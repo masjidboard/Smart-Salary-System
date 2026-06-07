@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0f5132">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="تنخواہ">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>اسمارٹ تنخواہ سسٹم — Smart Payroll</title>
+<script src="xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1ea; --panel:#fffdf8; --ink:#1f2a24; --muted:#6b7a72;
+  --line:#e2ddd0; --green:#0f5132; --green2:#157347; --gold:#b7791f;
+  --red:#9b2226; --soft:#eef3ef; --shadow:0 1px 3px rgba(31,42,36,.08),0 8px 24px rgba(31,42,36,.06);
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+  radial-gradient(900px 400px at 100% -10%,#e9efe9 0,transparent 60%),
+  radial-gradient(700px 380px at 0% 0%,#f0ece1 0,transparent 55%),var(--bg);
+  color:var(--ink);font-family:"Noto Naskh Arabic","Plus Jakarta Sans",sans-serif;font-size:15.5px;line-height:1.7}
+.num,input[type=number],input[type=time],input[type=date]{font-family:"Plus Jakarta Sans",sans-serif}
+header{padding:max(22px,env(safe-area-inset-top)) 26px 22px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,#fffefb,#fbf8f1)}
+.logo{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--green2));
+  display:grid;place-items:center;color:#fff;font-weight:700;font-size:22px;box-shadow:var(--shadow)}
+header h1{margin:0;font-size:21px;font-weight:700}
+header .sub{margin:0;color:var(--muted);font-size:13px;font-family:"Plus Jakarta Sans"}
+.wrap{max-width:1180px;margin:0 auto;padding:18px 16px 60px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:14px 0 18px}
+.tab{padding:9px 16px;border:1px solid var(--line);background:var(--panel);border-radius:999px;cursor:pointer;
+  font-weight:600;font-size:14.5px;color:var(--muted);transition:.15s}
+.tab:hover{border-color:#cfc8b6}
+.tab.active{background:var(--green);color:#fff;border-color:var(--green)}
+.panel{display:none;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.panel.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
+h2{font-size:17px;margin:2px 0 4px}
+.hint{color:var(--muted);font-size:13px;margin:0 0 14px;line-height:1.6}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+th{background:var(--soft);font-weight:700;color:var(--green);position:sticky;top:0;font-size:13px;white-space:nowrap}
+.scroll{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+input,select{font-family:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus{outline:2px solid #cfe3d6;border-color:var(--green2)}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--green)}
+td input{min-width:64px}
+.w-sm{max-width:90px}
+.btn{border:0;border-radius:10px;padding:10px 18px;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:hover{transform:translateY(-1px)}
+.btn-green{background:var(--green);color:#fff}
+.btn-gold{background:var(--gold);color:#fff}
+.btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-red{background:#fff;border:1px solid #e6c9c9;color:var(--red);padding:5px 10px;font-size:13px;border-radius:8px}
+.btn-red:hover{background:var(--red);color:#fff}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:13px;font-weight:600;color:var(--muted)}
+.drop{border:2px dashed #c9d6cd;border-radius:14px;padding:30px;text-align:center;background:var(--soft);cursor:pointer;transition:.15s}
+.drop:hover,.drop.over{border-color:var(--green2);background:#e9f2ec}
+.drop b{color:var(--green);font-size:16px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12.5px;margin:3px;font-family:"Plus Jakarta Sans"}
+.chip .x{cursor:pointer;color:var(--red);font-weight:700}
+.warn{background:#fff7e6;border:1px solid #f0d9a8;color:#7a5b12;border-radius:10px;padding:10px 14px;font-size:13.5px;margin:10px 0}
+.ok{background:#e9f6ee;border:1px solid #b8e0c6;color:#13633b;border-radius:10px;padding:10px 14px;font-size:13.5px;margin:10px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:6px 0 16px}
+.kpi{background:linear-gradient(180deg,#fff,#fbf8f1);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi .v{font-size:22px;font-weight:700;font-family:"Plus Jakarta Sans"}
+.kpi .l{font-size:12.5px;color:var(--muted)}
+.right{text-align:left;direction:ltr}
+.pos{color:var(--green2);font-weight:600}
+.neg{color:var(--red);font-weight:600}
+.sec-title{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.mini{font-size:12px;color:var(--muted);font-family:"Plus Jakarta Sans"}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+.badge{font-family:"Plus Jakarta Sans";font-size:11px;background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--green)}
+@media print{.tabs,header .sub,.row-actions,.tab{display:none}.panel{box-shadow:none;border:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">ت</div>
+  <div>
+    <h1>اسمارٹ تنخواہ سسٹم</h1>
+    <p class="sub">Smart Payroll &mdash; eSSL Attendance to Salary Converter</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-t="import">📁 فائلیں و حساب</div>
+    <div class="tab" data-t="staff">👤 اساتذہ و تنخواہ</div>
+    <div class="tab" data-t="cat">⏰ اوقاتِ کیٹیگری</div>
+    <div class="tab" data-t="idr">🎯 خصوصی اوقات (فی ID)</div>
+    <div class="tab" data-t="set">⚙️ عام سیٹنگ</div>
+  </div>
+
+  <!-- ============ IMPORT & CALCULATE ============ -->
+  <div class="panel active" id="p-import">
+    <h2>روزانہ کی فائلیں امپورٹ کریں</h2>
+    <p class="hint">جیسے فائلیں آپ نے بھیجی تھیں (مثلاً <b>"11 April Saturday.xls"</b>) وہ یہاں ڈالیں۔ تاریخ فائل کے <b>نام</b> سے خود پڑھی جائے گی۔ ایک ساتھ پورے مہینے کی ساری فائلیں منتخب کر سکتے ہیں۔</p>
+    <div class="drop" id="drop">
+      <b>یہاں کلک کریں یا فائلیں یہاں چھوڑیں</b><br>
+      <span class="mini">.xls / .xlsx فائلیں (روزانہ حاضری)</span>
+      <input type="file" id="file" multiple accept=".xls,.xlsx" style="display:none">
+    </div>
+    <div id="filesList" style="margin-top:10px"></div>
+    <div id="importMsg"></div>
+
+    <div class="row-actions">
+      <button class="btn btn-green" id="calcBtn">⚡ ایک کلک میں حساب جوڑیں</button>
+      <button class="btn btn-gold" id="xlsxBtn" disabled>⬇️ Excel میں ایکسپورٹ کریں</button>
+      <button class="btn btn-ghost" id="clearFiles">🗑️ فائلیں ہٹائیں</button>
+      <button class="btn btn-ghost" id="printBtn">🖨️ پرنٹ / PDF</button>
+    </div>
+
+    <div id="kpis" class="kpis" style="display:none"></div>
+    <div id="resultArea"></div>
+  </div>
+
+  <!-- ============ STAFF ============ -->
+  <div class="panel" id="p-staff">
+    <div class="sec-title">
+      <div><h2>اساتذہ، کیٹیگری اور تنخواہ</h2>
+      <p class="hint">تنخواہ ایک بار درج کریں۔ کسی ID کو ڈیلیٹ کریں یا نیا اضافہ کریں۔ <span class="badge">صبح معاف</span> = اُس استاد کی صبح کی تاخیر شمار نہیں ہوگی (جیسے 47، 48)۔</p></div>
+    </div>
+    <div class="scroll">
+      <table id="staffTbl"><thead><tr>
+        <th>ID</th><th>نام</th><th>کیٹیگری</th><th>بنیادی تنخواہ</th>
+        <th>صبح معاف</th><th>دوپہر معاف</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="row-actions">
+      <button class="btn btn-green" id="addStaff">＋ نیا استاد</button>
+      <span class="mini" id="staffCount"></span>
+    </div>
+  </div>
+
+  <!-- ============ CATEGORY TIMES ============ -->
+  <div class="panel" id="p-cat">
+    <h2>کیٹیگری کے اوقات (حفظ / دینیات / ڈیفالٹ وغیرہ)</h2>
+    <p class="hint">
+      • <b>صبح</b> = صبح کا مقررہ ٹائم (اس کے بعد لیٹ)۔ • <b>صبح ختم</b> / <b>دوپہر ختم</b> = سیشن کب ختم ہوتا ہے۔ • <b>گھنٹے</b> اِنہی شروع و اختتام سے <b>خودکار</b> نکلتے ہیں (چاہیں تو ہاتھ سے بھی بدلیں)۔<br>
+      ہر کیٹیگری کا اپنا اختتام ہو سکتا ہے (مثلاً دینیات کا صبح ختم 10:50)۔ تاریخ خالی = ہمیشہ۔ کسی تاریخ سے بدلے تو نئی سطر + "تاریخ سے"۔ کسی خاص دن کا الگ ٹائم ہو تو "دن" منتخب کریں۔
+    </p>
+    <div class="scroll">
+      <table id="catTbl"><thead><tr>
+        <th>کیٹیگری</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>صبح ختم</th><th>دوپہر</th><th>دوپہر ختم</th><th>گھنٹے</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="row-actions"><button class="btn btn-green" id="addCat">＋ نیا قاعدہ</button></div>
+  </div>
+
+  <!-- ============ PER-ID OVERRIDES ============ -->
+  <div class="panel" id="p-idr">
+    <h2>خصوصی اوقات — کسی مخصوص ID کے لیے</h2>
+    <p class="hint">
+      یہ کیٹیگری کے اوقات پر فوقیت رکھتا ہے۔ صرف وہی خانہ بھریں جو بدلنا ہو؛ خالی خانہ کیٹیگری سے لیا جائے گا۔<br>
+      • مستقل الگ ٹائم → تاریخ و دن خالی/"ہر دن"۔<br>
+      • کسی خاص <b>دن</b> کا الگ ٹائم → "دن" منتخب کریں (مثلاً ID 27: ایک سطر "ہر دن 7:40"، دوسری سطر "جمعرات 7:30")۔ زیادہ مخصوص قاعدہ خودبخود غالب آتا ہے۔<br>
+      • کسی ایک تاریخ کے لیے → "تاریخ سے" و "تاریخ تک" ایک ہی۔ • پورے ہفتے کے لیے → 7 دن کی رینج۔
+    </p>
+    <div class="scroll">
+      <table id="idrTbl"><thead><tr>
+        <th>ID</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>دوپہر</th><th>گھنٹے</th><th></th>
+      </tr></thead><tbody></tbody></table>
+    </div>
+    <div class="row-actions"><button class="btn btn-green" id="addIdr">＋ نیا خصوصی قاعدہ</button></div>
+  </div>
+
+  <!-- ============ GENERAL SETTINGS ============ -->
+  <div class="panel" id="p-set">
+    <h2>عام سیٹنگ</h2>
+    <p class="hint">یہ سب ایک بار سیٹ کریں، خود محفوظ ہو جائے گا۔</p>
+    <div class="grid2">
+      <div class="field"><label>سال (فائل کے نام میں سال نہیں ہوتا)</label><input type="number" id="s-year"></div>
+      <div class="field"><label>مہینے کے کل دن (تنخواہ تقسیم کے لیے)</label>
+        <select id="s-cycleMode"><option value="auto">خودکار (جو مہینہ چل رہا ہو اُس کے 30/31/28 دن)</option><option value="manual">دستی</option></select>
+      </div>
+      <div class="field"><label>دستی دن (اوپر "دستی" ہو تو)</label><input type="number" id="s-cycleDays" value="30"></div>
+      <div class="field"><label>چھٹی کا دن (پورا معاف)</label>
+        <select id="s-off"><option value="-1">کوئی نہیں</option><option value="0">اتوار</option><option value="1">پیر</option><option value="2">منگل</option><option value="3">بدھ</option><option value="4">جمعرات</option><option value="5">جمعہ</option><option value="6">ہفتہ</option></select>
+      </div>
+      <div class="field"><label>اس دن دوپہر کی تاخیر معاف</label>
+        <select id="s-afoff"><option value="-1">کوئی نہیں</option><option value="0">اتوار</option><option value="1">پیر</option><option value="2">منگل</option><option value="3">بدھ</option><option value="4">جمعرات</option><option value="5">جمعہ</option><option value="6">ہفتہ</option></select>
+      </div>
+      <div class="field"><label>نئی کیٹیگری کا طے شدہ صبح اختتام</label><input type="time" id="s-mEnd"></div>
+      <div class="field"><label>نئی کیٹیگری کا طے شدہ دوپہر اختتام</label><input type="time" id="s-aEnd"></div>
+      <div class="field"><label>صبح کے پنچ کی کھڑکی (شروع)</label><input type="time" id="s-mwS"></div>
+      <div class="field"><label>صبح کے پنچ کی کھڑکی (اختتام)</label><input type="time" id="s-mwE"></div>
+      <div class="field"><label>دوپہر کے پنچ کی کھڑکی (شروع)</label><input type="time" id="s-awS"></div>
+      <div class="field"><label>دوپہر کے پنچ کی کھڑکی (اختتام)</label><input type="time" id="s-awE"></div>
+    </div>
+    <p class="hint" style="margin-top:12px">📌 <b>اختتام</b> = سیشن کب ختم ہوتا ہے (گھنٹے خودکار نکالنے کے لیے)۔ <b>کھڑکی</b> = اس وقت کے اندر والا پنچ ہی "آمد" مانا جائے گا (مشین کے فالتو پنچ سے بچاؤ)۔ عام طور پر انہیں چھیڑنے کی ضرورت نہیں۔</p>
+    <div class="row-actions">
+      <button class="btn btn-green" id="saveSet">💾 محفوظ کریں</button>
+      <button class="btn btn-ghost" id="backup">⬇️ سیٹنگ بیک اپ (JSON)</button>
+      <button class="btn btn-ghost" id="restoreBtn">⬆️ سیٹنگ واپس لائیں</button>
+      <input type="file" id="restoreFile" accept=".json" style="display:none">
+      <button class="btn btn-red" id="resetAll" style="padding:10px 16px">↺ سب کچھ فیکٹری ری سیٹ</button>
+    </div>
+    <div id="setMsg"></div>
+  </div>
+</div>
+
+<footer>اسمارٹ تنخواہ سسٹم • ڈیٹا آپ کے کمپیوٹر میں محفوظ رہتا ہے، انٹرنیٹ پر کہیں نہیں جاتا</footer>
+
+<script>
+/* =================== DEFAULT DATA (آپ کی فائل سے) =================== */
+const DEFAULT_STAFF = [
+{"id":"1","name":"M.Saeed palanpuri","salary":20500,"category":"Hifz"},{"id":"2","name":"Q.Hafizur Rahman","salary":20500,"category":"Hifz"},{"id":"3","name":"M Wasi","salary":20500,"category":"Hifz"},{"id":"4","name":"M Abdulbasit","salary":20500,"category":"Hifz"},{"id":"5","name":"M Saifullah","salary":20500,"category":"Hifz"},{"id":"6","name":"M Zakriya","salary":20500,"category":"Hifz"},{"id":"7","name":"H Bilal","salary":20500,"category":"Hifz"},{"id":"8","name":"M Maaz Sable","salary":19500,"category":"Diniyat"},{"id":"9","name":"M Mohammad Palanpuri","salary":20500,"category":"Hifz"},{"id":"10","name":"M Mohammad Sakri","salary":20500,"category":"Hifz"},{"id":"11","name":"M Muddassir","salary":20500,"category":"Hifz"},{"id":"12","name":"Q Masroor","salary":26500,"category":"Default"},{"id":"13","name":"Q Moazzam","salary":19500,"category":"Diniyat"},{"id":"14","name":"Q Suhail Khan","salary":19500,"category":"Diniyat"},{"id":"15","name":"M Abrar","salary":19500,"category":"Diniyat"},{"id":"16","name":"M Sajid Siddiqi","salary":19500,"category":"Diniyat"},{"id":"17","name":"M Akhtar","salary":21500,"category":"Diniyat"},{"id":"18","name":"M Sabir","salary":19500,"category":"Diniyat"},{"id":"19","name":"M Anas","salary":20500,"category":"Hifz"},{"id":"20","name":"M Huzaifa","salary":21500,"category":"Default"},{"id":"22","name":"M Farhan Zahoor","salary":20500,"category":"Hifz"},{"id":"23","name":"M Mansoor","salary":26500,"category":"Default"},{"id":"24","name":"M Suhail Patel","salary":21500,"category":"Default"},{"id":"25","name":"M Habib","salary":21500,"category":"Default"},{"id":"26","name":"M Faisal","salary":24500,"category":"Default"},{"id":"27","name":"M Saeed","salary":24500,"category":"Default"},{"id":"28","name":"M Salman","salary":24500,"category":"Default"},{"id":"29","name":"M Azhar","salary":24500,"category":"Default"},{"id":"30","name":"M Aman","salary":24500,"category":"Default"},{"id":"31","name":"M Ishaq","salary":26500,"category":"Default"},{"id":"32","name":"M Farhan Nadwi","salary":24500,"category":"Default"},{"id":"33","name":"M Ubaidur Rahman","salary":21500,"category":"Default"},{"id":"34","name":"M Zahoor","salary":21500,"category":"Default"},{"id":"35","name":"M Mamoon","salary":24500,"category":"Default"},{"id":"36","name":"M Shamshuddin","salary":24500,"category":"Default"},{"id":"37","name":"Q Maaz","salary":21500,"category":"Default"},{"id":"38","name":"Q Salman","salary":21500,"category":"Default"},{"id":"39","name":"M Tanweer","salary":24500,"category":"Default"},{"id":"40","name":"M Noman Patel","salary":21500,"category":"Default"},{"id":"41","name":"M Sajid Patni","salary":24500,"category":"Default"},{"id":"42","name":"M Bilal Tanbe","salary":21500,"category":"Default","fa":true},{"id":"43","name":"M Safwan Nadwi","salary":21500,"category":"Default"},{"id":"44","name":"M Sarfaraz","salary":24500,"category":"Default"},{"id":"45","name":"M Noman Pansare","salary":19500,"category":"Default"},{"id":"46","name":"M Sad","salary":19500,"category":"Default"},{"id":"47","name":"Q Sadre Aalam","salary":13500,"category":"4HOURS","fm":true},{"id":"48","name":"M.Arqam","salary":6750,"category":"2HOURS","fm":true}
+];
+const DEFAULT_CAT = [
+{category:"Hifz",from:"",to:"",day:"all",morning:"06:30",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6.5},
+{category:"Diniyat",from:"",to:"",day:"all",morning:"06:45",mEnd:"10:50",afternoon:"14:15",aEnd:"16:15",hours:6.08},
+{category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6},
+{category:"4HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:4},
+{category:"2HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:2}
+];
+const DEFAULT_IDR = [
+{staffID:"27",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6},
+{staffID:"35",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6},
+{staffID:"31",from:"",to:"",day:"all",morning:"",afternoon:"14:55",hours:6},
+{staffID:"42",from:"",to:"",day:"all",morning:"11:00",afternoon:"",hours:7.75}
+];
+const DEFAULT_SET = {year:2026,cycleMode:"auto",cycleDays:30,off:5,afoff:4,
+  mwS:"05:00",mwE:"11:00",awS:"13:00",awE:"17:00",mEnd:"11:00",aEnd:"16:15"};
+
+/* =================== STATE =================== */
+let S = load();
+function load(){
+  try{ const s=JSON.parse(localStorage.getItem("payrollState")); if(s&&s.staff) return normalize(s); }catch(e){}
+  return {staff:clone(DEFAULT_STAFF),cat:clone(DEFAULT_CAT),idr:clone(DEFAULT_IDR),set:clone(DEFAULT_SET)};
+}
+/* purani saved state mein naye field na hon to bhar do */
+function normalize(s){
+  const dM=(s.set&&s.set.mEnd)||"11:00", dA=(s.set&&s.set.aEnd)||"16:15";
+  s.cat=(s.cat||[]).map(c=>({day:"all",mEnd:dM,aEnd:dA,...c}));
+  s.idr=(s.idr||[]).map(o=>({day:"all",...o}));
+  s.set={...DEFAULT_SET,...(s.set||{})};
+  return s;
+}
+function save(){ localStorage.setItem("payrollState",JSON.stringify({staff:S.staff,cat:S.cat,idr:S.idr,set:S.set})); }
+function clone(x){return JSON.parse(JSON.stringify(x));}
+let ATT = {};      // {dateISO:{staffID:[secOfDay,...]}}
+let FILES = [];    // names imported
+let RESULTS = [];
+let MANUAL = {};   // {staffID: کل دستی منٹ (اس مہینے کے)}
+
+/* =================== HELPERS =================== */
+const MONTHS={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
+function pad(n){return String(n).padStart(2,"0");}
+function timeToSec(t){ if(!t) return null; const m=String(t).match(/(\d{1,2}):(\d{2})/); if(!m) return null; const h=+m[1],mi=+m[2]; if(h>23||mi>59) return null; return h*3600+mi*60; }
+function secToHMS(s){ s=Math.round(s); const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),x=s%60; return pad(h)+":"+pad(m)+":"+pad(x); }
+function fmt(n){ return Number(n).toLocaleString("en-US",{minimumFractionDigits:0,maximumFractionDigits:2}); }
+function daysInMonth(y,m){ return new Date(y,m,0).getDate(); }
+function el(t,a={},h=""){const e=document.createElement(t);for(const k in a)e.setAttribute(k,a[k]);if(h)e.innerHTML=h;return e;}
+
+/* parse date from a filename: "11 April Saturday" / "14April tuesday" */
+function dateFromName(name){
+  const base=name.replace(/\.(xls|xlsx)$/i,"");
+  const m=base.match(/(\d{1,2})\s*([A-Za-z]+)/);
+  if(!m) return null;
+  const day=+m[1]; const mon=MONTHS[m[2].toLowerCase()];
+  if(!mon||day<1||day>31) return null;
+  let year=S.set.year||2026;
+  return {iso:`${year}-${pad(mon)}-${pad(day)}`, day, mon, year};
+}
+
+/* =================== FILE PARSING =================== */
+const knownIds=()=>new Set(S.staff.map(s=>s.id));
+function parseWorkbook(wb, dateISO){
+  const out={};
+  wb.SheetNames.forEach(sn=>{
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,raw:false,defval:""});
+    rows.forEach(r=>{
+      const cells=r.map(c=>c==null?"":String(c));
+      const joined=cells.join(" | ");
+      // ID = سطر کے شروع والا نمبر (eSSL فارمیٹ: <id>,"نام",...)۔
+      // ٹائم میں سے غلط نمبر نہ پکڑے، اس لیے صرف شروع والا نمبر دیکھتے ہیں۔
+      let id=null;
+      for(const c of cells){
+        const mm=c.match(/^\s*"?\s*(\d{1,4})\s*,/);   // نمبر کے بعد کوما (eSSL سطر)
+        if(mm){ id=mm[1]; break; }
+      }
+      if(!id){ // متبادل: کوئی خانہ جو خالص عدد ہو (ٹیبل فارمیٹ)
+        for(const c of cells){ const mm=c.match(/^\s*"?\s*(\d{1,4})\s*"?\s*$/); if(mm){ id=mm[1]; break; } }
+      }
+      if(!id) return;                                  // عنوان/خالی سطریں چھوڑ دیں
+      // اسی سطر کے سارے HH:MM پنچ جمع کریں
+      const times=[]; const tm=joined.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g)||[];
+      tm.forEach(t=>{ const s=timeToSec(t); if(s!=null) times.push(s); });
+      if(!times.length) return;                        // غیرحاضر (پنچ نہیں) → در گزر
+      out[id]=(out[id]||[]).concat(times);
+    });
+  });
+  // ہر استاد کے ٹائم ترتیب سے (سب سے جلدی پہلے) — تاکہ صبح کا "پہلا/جلدی" پنچ لیا جائے
+  for(const k in out){ out[k]=[...new Set(out[k])].sort((a,b)=>a-b); }
+  return out;
+}
+function readFile(file){
+  return new Promise((res,rej)=>{
+    const dt=dateFromName(file.name);
+    if(!dt){ res({file:file.name,err:"تاریخ نہیں پڑھی جا سکی"}); return; }
+    const rd=new FileReader();
+    rd.onload=e=>{ try{
+        const wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        const data=parseWorkbook(wb,dt.iso);
+        res({file:file.name,iso:dt.iso,data,count:Object.keys(data).length});
+      }catch(err){ res({file:file.name,err:"فائل پڑھنے میں مسئلہ"}); } };
+    rd.onerror=()=>res({file:file.name,err:"فائل نہیں کھلی"});
+    rd.readAsArrayBuffer(file);
+  });
+}
+async function handleFiles(list){
+  const arr=[...list]; const msgs=[];
+  for(const f of arr){
+    const r=await readFile(f);
+    if(r.err){ msgs.push(`⚠️ ${r.file} — ${r.err}`); continue; }
+    ATT[r.iso]=r.data; FILES.push({name:r.file,iso:r.iso,count:r.count});
+    msgs.push(`✓ ${r.file} → ${r.iso} (${r.count} اساتذہ)`);
+  }
+  renderFiles(); 
+  document.getElementById("importMsg").innerHTML=
+    `<div class="${msgs.some(m=>m.startsWith('⚠'))?'warn':'ok'}">${msgs.join("<br>")}</div>`;
+}
+function renderFiles(){
+  const box=document.getElementById("filesList");
+  if(!FILES.length){box.innerHTML="";return;}
+  box.innerHTML=`<div class="mini">امپورٹ شدہ دن: <b>${FILES.length}</b></div>`+
+    FILES.map((f,i)=>`<span class="chip">${f.iso} <span class="mini">(${f.name})</span> <span class="x" data-i="${i}">✕</span></span>`).join("");
+  box.querySelectorAll(".x").forEach(x=>x.onclick=()=>{
+    const f=FILES[+x.dataset.i]; delete ATT[f.iso]; FILES.splice(+x.dataset.i,1); renderFiles();
+  });
+}
+
+/* =================== RESOLVE TARGET TIME =================== */
+function inRange(iso,from,to){ if(from&&iso<from) return false; if(to&&iso>to) return false; return true; }
+function dayMatch(d,wd){ return !d || d==="all" || +d===wd; }              // dn match karta hai?
+function daySpec(d){ return d && d!=="all"; }                              // makhsoos din hai?
+function ruleScore(r,wd){ return (daySpec(r.day)?2:0) + (r.from?1:0); }    // makhsoos din + tareekh = ziyada fauqiyat
+function sameCat(a,b){ return String(a).trim().toLowerCase()===String(b).trim().toLowerCase(); }
+function resolveTarget(staffID,category,iso){
+  const wd=new Date(iso).getDay();
+  let morning=null,afternoon=null,hours=null;
+  // 1) kategory ka behtareen milta hua qaida (makhsoos din + tareekh جیتے)
+  let cats=S.cat.filter(c=>sameCat(c.category,category)&&inRange(iso,c.from,c.to)&&dayMatch(c.day,wd));
+  cats.sort((a,b)=>ruleScore(b,wd)-ruleScore(a,wd));
+  if(cats[0]){ morning=cats[0].morning||null; afternoon=cats[0].afternoon||null; hours=parseFloat(cats[0].hours)||null; }
+  // 2) fi-ID khususi qaide — sab milte hue lagao (kam fauqiyat پہلے), sirf bhara hua khana
+  let idrs=S.idr.filter(o=>o.staffID===staffID&&inRange(iso,o.from,o.to)&&dayMatch(o.day,wd));
+  idrs.sort((a,b)=>ruleScore(a,wd)-ruleScore(b,wd));
+  idrs.forEach(o=>{ if(o.morning) morning=o.morning; if(o.afternoon) afternoon=o.afternoon; if(o.hours) hours=parseFloat(o.hours); });
+  if(hours==null) hours=6;
+  return {morning:timeToSec(morning),afternoon:timeToSec(afternoon),hours};
+}
+/* صبح/دوپہر کے شروع اور اُسی کیٹیگری کے اختتام سے گھنٹے خودکار */
+function autoHours(morning,afternoon,mEnd,aEnd){
+  const mE=timeToSec(mEnd),aE=timeToSec(aEnd);
+  const m=timeToSec(morning),a=timeToSec(afternoon);
+  let h=0;
+  if(m!=null&&mE!=null&&mE>m) h+=(mE-m)/3600;
+  if(a!=null&&aE!=null&&aE>a) h+=(aE-a)/3600;
+  return Math.round(h*100)/100;
+}
+const DAY_OPTS=[["all","ہر دن"],["0","اتوار"],["1","پیر"],["2","منگل"],["3","بدھ"],["4","جمعرات"],["5","جمعہ"],["6","ہفتہ"]];
+function daySelect(sel){ return `<select data-f="day">`+DAY_OPTS.map(([v,l])=>`<option value="${v}" ${String(sel)===v?"selected":""}>${l}</option>`).join("")+`</select>`; }
+
+/* =================== CALCULATE =================== */
+function calculate(){
+  const dates=Object.keys(ATT).sort();
+  if(!dates.length){ document.getElementById("importMsg").innerHTML=`<div class="warn">پہلے فائلیں امپورٹ کریں۔</div>`; return; }
+  // ===== تقسیم کے دن: جو مہینہ "چل رہا ہے" (جس کے سب سے زیادہ دن سائیکل میں ہوں) =====
+  let cycleDays, cycleMonthLabel;
+  const URDU_MONTH=["","جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"];
+  const cnt={};
+  dates.forEach(iso=>{ const k=iso.slice(0,7); cnt[k]=(cnt[k]||0)+1; });   // ہر مہینے کے دن گنیں
+  const bestKey=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b))[0];
+  const [by,bm]=bestKey.split("-").map(Number);
+  if(S.set.cycleMode==="manual"){ cycleDays=+S.set.cycleDays||30; cycleMonthLabel=`دستی (${cycleDays} دن)`; }
+  else { cycleDays=daysInMonth(by,bm); cycleMonthLabel=`${URDU_MONTH[bm]} ${by} — ${cycleDays} دن`; }
+  window.__cycleMonthLabel=cycleMonthLabel;
+  const mwS=timeToSec(S.set.mwS),mwE=timeToSec(S.set.mwE),awS=timeToSec(S.set.awS),awE=timeToSec(S.set.awE);
+  const off=+S.set.off, afoff=+S.set.afoff;
+  const staffMap={}; S.staff.forEach(s=>staffMap[s.id]=s);
+
+  RESULTS=[]; const detail=[]; const unknown=new Set();
+  // detect attendance ids not in master
+  dates.forEach(iso=>Object.keys(ATT[iso]).forEach(id=>{ if(!staffMap[id]) unknown.add(id); }));
+
+  S.staff.forEach(s=>{
+    let lateSec=0,deduct=0,present=0,lateDays=0;
+    dates.forEach(iso=>{
+      const wd=new Date(iso).getDay();
+      if(off>=0 && wd===off) return; // full holiday
+      const punches=ATT[iso][s.id];
+      if(!punches||!punches.length) return; // finger not registered -> forgive
+      present++;
+      const tg=resolveTarget(s.id,s.category,iso);
+      // صبح کی کھڑکی استاد کے اپنے مقررہ ٹائم کے مطابق بڑھ جائے (دیر سے آنے والوں جیسے ID 42 کے لیے)
+      // تاکہ ان کی آمد چھوٹ نہ جائے؛ دوپہر کی کھڑکی سے ٹکراؤ نہ ہو۔
+      let mUp=mwE;
+      if(tg.morning!=null) mUp=Math.min(awS, Math.max(mwE, tg.morning + 120*60));
+      let mp=null,ap=null;
+      for(const p of punches){ if(mp===null && p>=mwS && p<=mUp) mp=p; if(ap===null && p>=awS && p<=awE) ap=p; }
+      let dl=0,mLate=0,aLate=0;
+      if(!s.fm && tg.morning!=null && mp!=null && mp>tg.morning){ mLate=mp-tg.morning; dl+=mLate; }
+      if(!(afoff>=0&&wd===afoff) && !s.fa && tg.afternoon!=null && ap!=null && ap>tg.afternoon){ aLate=ap-tg.afternoon; dl+=aLate; }
+      if(dl>0) lateDays++;
+      lateSec+=dl;
+      const dailySec=(tg.hours||6)*3600;
+      const perSec=dailySec>0?(s.salary/cycleDays/dailySec):0;
+      deduct+=dl*perSec;
+      if(dl>0) detail.push([iso,s.id,s.name,mp!=null?secToHMS(mp).slice(0,5):"",ap!=null?secToHMS(ap).slice(0,5):"",Math.round(mLate/60),Math.round(aLate/60),Math.round(dl/60)]);
+    });
+    // دستی منٹ (پورے مہینے کا کل) — اسی ریٹ سے کٹیں (منٹ×60×فی سیکنڈ ریٹ)
+    const manualMin=+MANUAL[s.id]||0;
+    const repHours=resolveTarget(s.id,s.category,dates[0]).hours||6;
+    const repPerSec=(repHours*3600)>0?(s.salary/cycleDays/(repHours*3600)):0;
+    const manualDed=manualMin*60*repPerSec;
+    deduct=Math.round((deduct+manualDed)*100)/100;
+    RESULTS.push({id:s.id,name:s.name,cat:s.category,salary:s.salary,cycleDays,perDay:Math.round(s.salary/cycleDays*100)/100,
+      present,lateDays,lateSec,lateHMS:secToHMS(lateSec),manualMin,manualDed:Math.round(manualDed*100)/100,
+      deduct,net:Math.round((s.salary-deduct)*100)/100});
+  });
+  window.__detail=detail; window.__cycleDays=cycleDays;
+  renderResults(unknown,dates.length);
+  document.getElementById("xlsxBtn").disabled=false;
+}
+
+function renderResults(unknown,nDays){
+  const totSal=RESULTS.reduce((a,r)=>a+r.salary,0);
+  const totDed=RESULTS.reduce((a,r)=>a+r.deduct,0);
+  const totNet=RESULTS.reduce((a,r)=>a+r.net,0);
+  const k=document.getElementById("kpis"); k.style.display="grid";
+  k.innerHTML=`
+    <div class="kpi"><div class="v">${nDays}</div><div class="l">امپورٹ شدہ دن</div></div>
+    <div class="kpi"><div class="v" style="font-size:15px;line-height:2.6">${window.__cycleMonthLabel||"-"}</div><div class="l">چلتا مہینہ / تقسیم دن</div></div>
+    <div class="kpi"><div class="v">${RESULTS.length}</div><div class="l">اساتذہ</div></div>
+    <div class="kpi"><div class="v">${fmt(totSal)}</div><div class="l">کل بنیادی</div></div>
+    <div class="kpi"><div class="v" style="color:var(--red)">${fmt(totDed)}</div><div class="l">کل کٹوتی</div></div>
+    <div class="kpi"><div class="v" style="color:var(--green2)">${fmt(totNet)}</div><div class="l">کل قابلِ ادائیگی</div></div>`;
+  let warn="";
+  if(unknown.size) warn=`<div class="warn">یہ ID حاضری میں ہیں مگر اساتذہ کی فہرست میں نہیں — ان کا حساب نہیں ہوا: <b>${[...unknown].join(", ")}</b>۔ اگر چاہیں تو "اساتذہ" میں شامل کریں۔</div>`;
+  const rows=RESULTS.map(r=>`<tr>
+    <td class="num">${r.id}</td><td>${r.name}</td><td>${r.cat}</td>
+    <td class="num right">${fmt(r.salary)}</td>
+    <td class="num">${r.present}</td><td class="num">${r.lateDays}</td>
+    <td class="num right">${r.lateHMS}</td>
+    <td><input type="number" class="num w-sm" style="min-width:58px" value="${r.manualMin||0}" data-mid="${r.id}"></td>
+    <td class="num right ${r.deduct>0?'neg':''}">${fmt(r.deduct)}</td>
+    <td class="num right pos">${fmt(r.net)}</td>
+  </tr>`).join("");
+  document.getElementById("resultArea").innerHTML=warn+`
+    <div class="scroll" style="margin-top:8px"><table><thead><tr>
+      <th>ID</th><th>نام</th><th>کیٹیگری</th><th>بنیادی تنخواہ</th><th>حاضر دن</th><th>لیٹ دن</th>
+      <th>کل تاخیر (گ:م:س)</th><th>دستی منٹ</th><th>کٹوتی</th><th>خالص تنخواہ</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="mini" style="margin-top:8px">چلتا مہینہ: <b>${window.__cycleMonthLabel||""}</b> • تقسیم کے دن: ${window.__cycleDays} • <b>دستی منٹ</b> = کسی استاد کے کل اضافی لیٹ منٹ؛ بھرتے ہی کٹوتی و خالص تنخواہ خود اپڈیٹ ہو جائے گی۔ فنگر نہ لگنے والے دن اور چھٹی کے دن کٹوتی میں شامل نہیں۔</p>`;
+  // دستی منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
+  document.querySelectorAll("[data-mid]").forEach(inp=>inp.onchange=()=>{
+    MANUAL[inp.dataset.mid]=+inp.value||0; calculate();
+  });
+}
+
+/* =================== EXPORT EXCEL =================== */
+function exportXLSX(){
+  if(!RESULTS.length){ return; }
+  const head=["ID","نام","کیٹیگری","بنیادی تنخواہ","تقسیم دن","فی دن","حاضر دن","لیٹ دن","کل تاخیر سیکنڈ","کل تاخیر (گ:م:س)","دستی منٹ","دستی کٹوتی","کل کٹوتی","خالص تنخواہ"];
+  const aoa=[head]; 
+  RESULTS.forEach(r=>aoa.push([r.id,r.name,r.cat,r.salary,r.cycleDays,r.perDay,r.present,r.lateDays,r.lateSec,r.lateHMS,r.manualMin||0,r.manualDed||0,r.deduct,r.net]));
+  const tot=["","","کل میزان","",
+    "","","","","","","","",
+    Math.round(RESULTS.reduce((a,r)=>a+r.deduct,0)*100)/100,
+    Math.round(RESULTS.reduce((a,r)=>a+r.net,0)*100)/100];
+  aoa.push([]); aoa.push(tot);
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:9},{wch:11},{wch:12},{wch:14}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Salary Report");
+  const dh=[["تاریخ","ID","نام","صبح پنچ","دوپہر پنچ","صبح لیٹ منٹ","دوپہر لیٹ منٹ","کل لیٹ منٹ"]].concat(window.__detail||[]);
+  const ws2=XLSX.utils.aoa_to_sheet(dh); ws2["!cols"]=[{wch:12},{wch:6},{wch:22},{wch:10},{wch:10},{wch:12},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws2,"Daily Detail");
+  const dates=Object.keys(ATT).sort();
+  const tag=dates.length?`${dates[0]}_to_${dates[dates.length-1]}`:"report";
+  XLSX.writeFile(wb,`Salary_${tag}.xlsx`);
+}
+
+/* =================== RENDER EDITABLE TABLES =================== */
+function renderStaff(){
+  const tb=document.querySelector("#staffTbl tbody"); tb.innerHTML="";
+  S.staff.forEach((s,i)=>{
+    const tr=el("tr");
+    tr.innerHTML=`
+      <td><input class="w-sm num" value="${s.id}" data-f="id"></td>
+      <td><input value="${s.name||""}" data-f="name"></td>
+      <td><input value="${s.category||""}" data-f="category" list="catlist"></td>
+      <td><input type="number" class="num" value="${s.salary||0}" data-f="salary"></td>
+      <td style="text-align:center"><input type="checkbox" data-f="fm" ${s.fm?"checked":""}></td>
+      <td style="text-align:center"><input type="checkbox" data-f="fa" ${s.fa?"checked":""}></td>
+      <td><button class="btn-red" data-del="${i}">حذف</button></td>`;
+    tr.querySelectorAll("[data-f]").forEach(inp=>inp.onchange=()=>{
+      const f=inp.dataset.f;
+      S.staff[i][f]= f==="fm"||f==="fa"?inp.checked : f==="salary"?(+inp.value||0):inp.value;
+      save();
+    });
+    tr.querySelector("[data-del]").onclick=()=>{ if(confirm(`ID ${s.id} (${s.name}) کو ڈیلیٹ کریں؟`)){ S.staff.splice(i,1); save(); renderStaff(); } };
+    tb.appendChild(tr);
+  });
+  document.getElementById("staffCount").textContent=`کل اساتذہ: ${S.staff.length}`;
+  buildCatList();
+}
+function buildCatList(){
+  let dl=document.getElementById("catlist"); if(!dl){dl=el("datalist",{id:"catlist"});document.body.appendChild(dl);}
+  const cats=[...new Set(S.cat.map(c=>c.category))];
+  dl.innerHTML=cats.map(c=>`<option value="${c}">`).join("");
+}
+function renderCat(){
+  const tb=document.querySelector("#catTbl tbody"); tb.innerHTML="";
+  S.cat.forEach((c,i)=>{
+    const tr=el("tr");
+    tr.innerHTML=`
+      <td><input value="${c.category}" data-f="category"></td>
+      <td><input type="date" value="${c.from||""}" data-f="from"></td>
+      <td><input type="date" value="${c.to||""}" data-f="to"></td>
+      <td>${daySelect(c.day||"all")}</td>
+      <td><input type="time" value="${c.morning||""}" data-f="morning"></td>
+      <td><input type="time" value="${c.mEnd||""}" data-f="mEnd"></td>
+      <td><input type="time" value="${c.afternoon||""}" data-f="afternoon"></td>
+      <td><input type="time" value="${c.aEnd||""}" data-f="aEnd"></td>
+      <td><input type="number" step="0.01" class="w-sm num" value="${c.hours}" data-f="hours"></td>
+      <td><button class="btn-red" data-del="${i}">حذف</button></td>`;
+    const hoursInp=tr.querySelector('[data-f="hours"]');
+    tr.querySelectorAll("[data-f]").forEach(inp=>inp.onchange=()=>{
+      S.cat[i][inp.dataset.f]=inp.value;
+      if(["morning","afternoon","mEnd","aEnd"].includes(inp.dataset.f)){     // گھنٹے خودکار
+        const h=autoHours(S.cat[i].morning,S.cat[i].afternoon,S.cat[i].mEnd,S.cat[i].aEnd);
+        if(h>0){ S.cat[i].hours=h; hoursInp.value=h; }
+      }
+      save(); buildCatList();
+    });
+    tr.querySelector("[data-del]").onclick=()=>{ S.cat.splice(i,1); save(); renderCat(); };
+    tb.appendChild(tr);
+  });
+}
+function renderIdr(){
+  const tb=document.querySelector("#idrTbl tbody"); tb.innerHTML="";
+  S.idr.forEach((o,i)=>{
+    const tr=el("tr");
+    tr.innerHTML=`
+      <td><input class="w-sm num" value="${o.staffID}" data-f="staffID"></td>
+      <td><input type="date" value="${o.from||""}" data-f="from"></td>
+      <td><input type="date" value="${o.to||""}" data-f="to"></td>
+      <td>${daySelect(o.day||"all")}</td>
+      <td><input type="time" value="${o.morning||""}" data-f="morning"></td>
+      <td><input type="time" value="${o.afternoon||""}" data-f="afternoon"></td>
+      <td><input type="number" step="0.01" class="w-sm num" value="${o.hours||""}" data-f="hours"></td>
+      <td><button class="btn-red" data-del="${i}">حذف</button></td>`;
+    tr.querySelectorAll("[data-f]").forEach(inp=>inp.onchange=()=>{ S.idr[i][inp.dataset.f]=inp.value; save(); });
+    tr.querySelector("[data-del]").onclick=()=>{ S.idr.splice(i,1); save(); renderIdr(); };
+    tb.appendChild(tr);
+  });
+}
+function renderSet(){
+  const g=id=>document.getElementById(id);
+  g("s-year").value=S.set.year; g("s-cycleMode").value=S.set.cycleMode; g("s-cycleDays").value=S.set.cycleDays;
+  g("s-off").value=S.set.off; g("s-afoff").value=S.set.afoff;
+  g("s-mwS").value=S.set.mwS; g("s-mwE").value=S.set.mwE; g("s-awS").value=S.set.awS; g("s-awE").value=S.set.awE;
+  g("s-mEnd").value=S.set.mEnd||"11:00"; g("s-aEnd").value=S.set.aEnd||"16:15";
+}
+
+/* =================== WIRING =================== */
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(x=>x.classList.remove("active"));
+  t.classList.add("active"); document.getElementById("p-"+t.dataset.t).classList.add("active");
+});
+const drop=document.getElementById("drop"),file=document.getElementById("file");
+drop.onclick=()=>file.click();
+file.onchange=e=>handleFiles(e.target.files);
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>handleFiles(e.dataTransfer.files));
+document.getElementById("calcBtn").onclick=calculate;
+document.getElementById("xlsxBtn").onclick=exportXLSX;
+document.getElementById("printBtn").onclick=()=>window.print();
+document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true; };
+document.getElementById("addStaff").onclick=()=>{ S.staff.push({id:"",name:"",category:"Default",salary:0}); save(); renderStaff(); };
+document.getElementById("addCat").onclick=()=>{ S.cat.push({category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6}); save(); renderCat(); };
+document.getElementById("addIdr").onclick=()=>{ S.idr.push({staffID:"",from:"",to:"",day:"all",morning:"",afternoon:"",hours:""}); save(); renderIdr(); };
+document.getElementById("saveSet").onclick=()=>{
+  const g=id=>document.getElementById(id).value;
+  S.set={year:+g("s-year")||2026,cycleMode:g("s-cycleMode"),cycleDays:+g("s-cycleDays")||30,off:+g("s-off"),afoff:+g("s-afoff"),
+    mwS:g("s-mwS"),mwE:g("s-mwE"),awS:g("s-awS"),awE:g("s-awE"),mEnd:g("s-mEnd"),aEnd:g("s-aEnd")};
+  save(); renderCat(); document.getElementById("setMsg").innerHTML=`<div class="ok">سیٹنگ محفوظ ہو گئی ✓</div>`;
+};
+document.getElementById("backup").onclick=()=>{
+  const blob=new Blob([JSON.stringify({staff:S.staff,cat:S.cat,idr:S.idr,set:S.set},null,2)],{type:"application/json"});
+  const a=el("a",{href:URL.createObjectURL(blob),download:"payroll_settings.json"}); a.click();
+};
+document.getElementById("restoreBtn").onclick=()=>document.getElementById("restoreFile").click();
+document.getElementById("restoreFile").onchange=e=>{
+  const f=e.target.files[0]; if(!f)return; const rd=new FileReader();
+  rd.onload=ev=>{ try{ const j=JSON.parse(ev.target.result); S={staff:j.staff,cat:j.cat,idr:j.idr,set:j.set}; save(); renderAll(); alert("سیٹنگ بحال ہو گئی"); }catch(x){ alert("فائل درست نہیں"); } };
+  rd.readAsText(f);
+};
+document.getElementById("resetAll").onclick=()=>{ if(confirm("سب کچھ فیکٹری ڈیفالٹ پر لے جائیں؟ موجودہ تبدیلیاں ختم ہو جائیں گی۔")){ localStorage.removeItem("payrollState"); S=load(); renderAll(); } };
+
+function renderAll(){ renderStaff(); renderCat(); renderIdr(); renderSet(); }
+renderAll();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+}
+</script>
+</body>
+</html>
