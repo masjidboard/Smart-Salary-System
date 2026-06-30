@@ -107,14 +107,26 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
   <!-- ============ IMPORT & CALCULATE ============ -->
   <div class="panel active" id="p-import">
     <h2>روزانہ کی فائلیں امپورٹ کریں</h2>
-    <p class="hint">جیسے فائلیں آپ نے بھیجی تھیں (مثلاً <b>"11 April Saturday.xls"</b>) وہ یہاں ڈالیں۔ تاریخ فائل کے <b>نام</b> سے خود پڑھی جائے گی۔ ایک ساتھ پورے مہینے کی ساری فائلیں منتخب کر سکتے ہیں۔</p>
+    <p class="hint">جیسے فائلیں آپ نے بھیجی تھیں (مثلاً <b>"11 April Saturday.xls"</b>) وہ یہاں ڈالیں — تاریخ فائل کے <b>نام</b> سے خود پڑھی جائے گی۔ یا مشین کی <b>attlog.dat</b> فائل بھی ڈال سکتے ہیں — اُس میں خود بخود کئی دنوں کا ڈیٹا ہوتا ہے، سب خودکار پڑھ لیا جائے گا۔ کئی مہینوں کی فائلیں ایک ساتھ ڈال سکتے ہیں؛ نیچے جس مدت کا حساب جوڑنا ہو وہ منتخب کر لیں۔</p>
     <div class="drop" id="drop">
       <b>یہاں کلک کریں یا فائلیں یہاں چھوڑیں</b><br>
-      <span class="mini">.xls / .xlsx فائلیں (روزانہ حاضری)</span>
-      <input type="file" id="file" multiple accept=".xls,.xlsx" style="display:none">
+      <span class="mini">.xls / .xlsx (روزانہ حاضری) یا .dat (مشین کا attlog)</span>
+      <input type="file" id="file" multiple accept=".xls,.xlsx,.dat,.txt" style="display:none">
     </div>
     <div id="filesList" style="margin-top:10px"></div>
     <div id="importMsg"></div>
+
+    <div class="sec-title" style="margin-top:18px">
+      <div><h2 style="font-size:15px">تنخواہ کی مدت</h2>
+      <p class="hint" style="margin:2px 0 10px">ڈیفالٹ: پچھلے مہینے کی <b>10 تاریخ</b> سے اِس مہینے کی <b>9 تاریخ</b> تک۔ چاہیں تو خود تبدیل کر لیں — حساب صرف اِس مدت کے دنوں کا ہوگا، باقی درآمد شدہ دن نظرانداز ہوں گے۔</p></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>از تاریخ</label><input type="date" id="periodFrom"></div>
+      <div class="field"><label>تا تاریخ</label><input type="date" id="periodTo"></div>
+    </div>
+    <div class="row-actions">
+      <button class="btn btn-ghost" id="autoPeriod">🗓️ خودکار مدت لگائیں (10 تا 9)</button>
+    </div>
 
     <div class="row-actions">
       <button class="btn btn-green" id="calcBtn">⚡ ایک کلک میں حساب جوڑیں</button>
@@ -278,6 +290,53 @@ function dateFromName(name){
 
 /* =================== FILE PARSING =================== */
 const knownIds=()=>new Set(S.staff.map(s=>s.id));
+
+/* eSSL "attlog.dat" فارمیٹ — ہر لائن: ID \t YYYY-MM-DD HH:MM:SS \t ... (Tab سے الگ)۔
+   ایک ہی فائل میں کئی دنوں اور کئی اساتذہ کا ڈیٹا ہو سکتا ہے، سب خودکار الگ ہو جاتا ہے۔ */
+function parseAttlogText(text){
+  const out={};               // {dateISO:{staffID:[secOfDay,...]}}
+  const lines=text.split(/\r?\n/);
+  for(const line of lines){
+    if(!line.trim()) continue;
+    const parts=line.split("\t").map(p=>p.trim());
+    if(parts.length<2) continue;
+    const id=parts[0].replace(/^0+(?=\d)/,"");           // آگے کے زیرو ہٹا دیں (essl کبھی 001 لکھتی ہے)
+    const m=parts[1].match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{1,2}):(\d{2}):(\d{2})/);
+    if(!id || !/^\d+$/.test(id) || !m) continue;
+    const iso=`${m[1]}-${m[2]}-${m[3]}`;
+    const sec=(+m[4])*3600+(+m[5])*60+(+m[6]);
+    out[iso]=out[iso]||{};
+    out[iso][id]=(out[iso][id]||[]).concat([sec]);
+  }
+  for(const iso in out){ for(const id in out[iso]){ out[iso][id]=[...new Set(out[iso][id])].sort((a,b)=>a-b); } }
+  return out;
+}
+function readDatFile(file){
+  return new Promise(res=>{
+    const rd=new FileReader();
+    rd.onload=e=>{ try{
+        const data=parseAttlogText(String(e.target.result));
+        const n=Object.keys(data).length;
+        if(!n){ res({file:file.name,err:"اس فائل میں قابلِ شناخت ریکارڈ نہیں ملا"}); return; }
+        res({file:file.name,multiDate:true,data});
+      }catch(err){ res({file:file.name,err:"ڈیٹ فائل پڑھنے میں مسئلہ"}); } };
+    rd.onerror=()=>res({file:file.name,err:"فائل نہیں کھلی"});
+    rd.readAsText(file);
+  });
+}
+/* مہینے کی کسی تاریخ سے 10-سے-9 والی تنخواہ مدت خودکار نکالیں */
+function computeCycleRange(refISO){
+  const d=new Date(refISO+"T00:00:00");
+  let y=d.getFullYear(), m=d.getMonth()+1, day=d.getDate();
+  let endY=y, endM=m;
+  if(day>=10){ endM=m+1; if(endM>12){endM=1;endY++;} }
+  let startY=endY, startM=endM-1; if(startM<1){startM=12;startY--;}
+  return {from:`${startY}-${pad(startM)}-10`, to:`${endY}-${pad(endM)}-09`};
+}
+function setPeriodFields(from,to){
+  document.getElementById("periodFrom").value=from;
+  document.getElementById("periodTo").value=to;
+}
 function parseWorkbook(wb, dateISO){
   const out={};
   wb.SheetNames.forEach(sn=>{
@@ -321,17 +380,38 @@ function readFile(file){
     rd.readAsArrayBuffer(file);
   });
 }
+function mergeInto(iso,id,times){
+  ATT[iso]=ATT[iso]||{};
+  ATT[iso][id]=[...new Set((ATT[iso][id]||[]).concat(times))].sort((a,b)=>a-b);
+}
 async function handleFiles(list){
-  const arr=[...list]; const msgs=[];
+  const arr=[...list]; const msgs=[]; let lastIso=null;
   for(const f of arr){
-    const r=await readFile(f);
+    const isDat=/\.(dat|txt)$/i.test(f.name);
+    const r=isDat?await readDatFile(f):await readFile(f);
     if(r.err){ msgs.push(`⚠️ ${r.file} — ${r.err}`); continue; }
-    ATT[r.iso]=r.data; FILES.push({name:r.file,iso:r.iso,count:r.count});
-    msgs.push(`✓ ${r.file} → ${r.iso} (${r.count} اساتذہ)`);
+    if(r.multiDate){
+      const isos=Object.keys(r.data).sort();
+      isos.forEach(iso=>{
+        Object.keys(r.data[iso]).forEach(id=>mergeInto(iso,id,r.data[iso][id]));
+        FILES.push({name:r.file,iso,count:Object.keys(r.data[iso]).length});
+      });
+      lastIso=isos[isos.length-1]||lastIso;
+      msgs.push(`✓ ${r.file} → ${isos.length} دن کا ڈیٹا شامل ہوا (${isos[0]} سے ${isos[isos.length-1]} تک)`);
+    } else {
+      Object.keys(r.data).forEach(id=>mergeInto(r.iso,id,r.data[id]));
+      FILES.push({name:r.file,iso:r.iso,count:r.count});
+      lastIso=r.iso;
+      msgs.push(`✓ ${r.file} → ${r.iso} (${r.count} اساتذہ)`);
+    }
   }
-  renderFiles(); 
+  renderFiles();
   document.getElementById("importMsg").innerHTML=
     `<div class="${msgs.some(m=>m.startsWith('⚠'))?'warn':'ok'}">${msgs.join("<br>")}</div>`;
+  // مدت کی فیلڈز خالی ہوں تو نئے ترین درآمد شدہ دن سے خودکار بھر دیں
+  if(lastIso && !document.getElementById("periodFrom").value){
+    const c=computeCycleRange(lastIso); setPeriodFields(c.from,c.to);
+  }
 }
 function renderFiles(){
   const box=document.getElementById("filesList");
@@ -377,17 +457,18 @@ function daySelect(sel){ return `<select data-f="day">`+DAY_OPTS.map(([v,l])=>`<
 
 /* =================== CALCULATE =================== */
 function calculate(){
-  const dates=Object.keys(ATT).sort();
-  if(!dates.length){ document.getElementById("importMsg").innerHTML=`<div class="warn">پہلے فائلیں امپورٹ کریں۔</div>`; return; }
-  // ===== تقسیم کے دن: جو مہینہ "چل رہا ہے" (جس کے سب سے زیادہ دن سائیکل میں ہوں) =====
+  const allDates=Object.keys(ATT).sort();
+  if(!allDates.length){ document.getElementById("importMsg").innerHTML=`<div class="warn">پہلے فائلیں امپورٹ کریں۔</div>`; return; }
+  // ===== تنخواہ کی مدت: صارف کی منتخب کردہ "از تاریخ" تا "تا تاریخ" (ڈیفالٹ: پچھلے مہینے کی 10 سے اِس مہینے کی 9) =====
+  let pf=document.getElementById("periodFrom").value, pt=document.getElementById("periodTo").value;
+  if(!pf||!pt){ const c=computeCycleRange(allDates[allDates.length-1]); pf=c.from; pt=c.to; setPeriodFields(pf,pt); }
+  if(pf>pt){ const t=pf; pf=pt; pt=t; setPeriodFields(pf,pt); }
+  const dates=allDates.filter(d=>d>=pf&&d<=pt);
+  if(!dates.length){ document.getElementById("importMsg").innerHTML=`<div class="warn">منتخب مدت (${pf} تا ${pt}) میں کوئی درآمد شدہ دن نہیں ملا۔ مدت بدلیں یا متعلقہ فائلیں ڈالیں۔</div>`; return; }
   let cycleDays, cycleMonthLabel;
-  const URDU_MONTH=["","جنوری","فروری","مارچ","اپریل","مئی","جون","جولائی","اگست","ستمبر","اکتوبر","نومبر","دسمبر"];
-  const cnt={};
-  dates.forEach(iso=>{ const k=iso.slice(0,7); cnt[k]=(cnt[k]||0)+1; });   // ہر مہینے کے دن گنیں
-  const bestKey=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||a.localeCompare(b))[0];
-  const [by,bm]=bestKey.split("-").map(Number);
-  if(S.set.cycleMode==="manual"){ cycleDays=+S.set.cycleDays||30; cycleMonthLabel=`دستی (${cycleDays} دن)`; }
-  else { cycleDays=daysInMonth(by,bm); cycleMonthLabel=`${URDU_MONTH[bm]} ${by} — ${cycleDays} دن`; }
+  if(S.set.cycleMode==="manual"){ cycleDays=+S.set.cycleDays||30; }
+  else cycleDays=Math.round((new Date(pt)-new Date(pf))/86400000)+1;
+  cycleMonthLabel=`${pf} تا ${pt} — ${cycleDays} دن`;
   window.__cycleMonthLabel=cycleMonthLabel;
   const mwS=timeToSec(S.set.mwS),mwE=timeToSec(S.set.mwE),awS=timeToSec(S.set.awS),awE=timeToSec(S.set.awE);
   const off=+S.set.off, afoff=+S.set.afoff;
@@ -592,7 +673,12 @@ drop.addEventListener("drop",e=>handleFiles(e.dataTransfer.files));
 document.getElementById("calcBtn").onclick=calculate;
 document.getElementById("xlsxBtn").onclick=exportXLSX;
 document.getElementById("printBtn").onclick=()=>window.print();
-document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true; };
+document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true;document.getElementById("periodFrom").value="";document.getElementById("periodTo").value=""; };
+document.getElementById("autoPeriod").onclick=()=>{
+  const dates=Object.keys(ATT).sort();
+  const ref=dates.length?dates[dates.length-1]:new Date().toISOString().slice(0,10);
+  const c=computeCycleRange(ref); setPeriodFields(c.from,c.to);
+};
 document.getElementById("addStaff").onclick=()=>{ S.staff.push({id:"",name:"",category:"Default",salary:0}); save(); renderStaff(); };
 document.getElementById("addCat").onclick=()=>{ S.cat.push({category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6}); save(); renderCat(); };
 document.getElementById("addIdr").onclick=()=>{ S.idr.push({staffID:"",from:"",to:"",day:"all",morning:"",afternoon:"",hours:""}); save(); renderIdr(); };
