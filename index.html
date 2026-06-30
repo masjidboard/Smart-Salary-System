@@ -170,7 +170,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
         <th>کیٹیگری</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>صبح ختم</th><th>دوپہر</th><th>دوپہر ختم</th><th>وقفہ شروع</th><th>وقفہ ختم</th><th>گھنٹے</th><th></th>
       </tr></thead><tbody></tbody></table>
     </div>
-    <div class="row-actions"><button class="btn btn-green" id="addCat">＋ نیا قاعدہ</button></div>
+    <div class="row-actions">
+      <button class="btn btn-green" id="addCat">＋ نیا قاعدہ</button>
+      <button class="btn btn-ghost" id="recalcHours">🔁 سب گھنٹے وقفہ نکال کر دوبارہ شمار کریں</button>
+    </div>
+    <div id="recalcMsg"></div>
   </div>
 
   <!-- ============ PER-ID OVERRIDES ============ -->
@@ -233,9 +237,9 @@ const DEFAULT_STAFF = [
 {"id":"1","name":"M.Saeed palanpuri","salary":20500,"category":"Hifz"},{"id":"2","name":"Q.Hafizur Rahman","salary":20500,"category":"Hifz"},{"id":"3","name":"M Wasi","salary":20500,"category":"Hifz"},{"id":"4","name":"M Abdulbasit","salary":20500,"category":"Hifz"},{"id":"5","name":"M Saifullah","salary":20500,"category":"Hifz"},{"id":"6","name":"M Zakriya","salary":20500,"category":"Hifz"},{"id":"7","name":"H Bilal","salary":20500,"category":"Hifz"},{"id":"8","name":"M Maaz Sable","salary":19500,"category":"Diniyat"},{"id":"9","name":"M Mohammad Palanpuri","salary":20500,"category":"Hifz"},{"id":"10","name":"M Mohammad Sakri","salary":20500,"category":"Hifz"},{"id":"11","name":"M Muddassir","salary":20500,"category":"Hifz"},{"id":"12","name":"Q Masroor","salary":26500,"category":"Default"},{"id":"13","name":"Q Moazzam","salary":19500,"category":"Diniyat"},{"id":"14","name":"Q Suhail Khan","salary":19500,"category":"Diniyat"},{"id":"15","name":"M Abrar","salary":19500,"category":"Diniyat"},{"id":"16","name":"M Sajid Siddiqi","salary":19500,"category":"Diniyat"},{"id":"17","name":"M Akhtar","salary":21500,"category":"Diniyat"},{"id":"18","name":"M Sabir","salary":19500,"category":"Diniyat"},{"id":"19","name":"M Anas","salary":20500,"category":"Hifz"},{"id":"20","name":"M Huzaifa","salary":21500,"category":"Default"},{"id":"22","name":"M Farhan Zahoor","salary":20500,"category":"Hifz"},{"id":"23","name":"M Mansoor","salary":26500,"category":"Default"},{"id":"24","name":"M Suhail Patel","salary":21500,"category":"Default"},{"id":"25","name":"M Habib","salary":21500,"category":"Default"},{"id":"26","name":"M Faisal","salary":24500,"category":"Default"},{"id":"27","name":"M Saeed","salary":24500,"category":"Default"},{"id":"28","name":"M Salman","salary":24500,"category":"Default"},{"id":"29","name":"M Azhar","salary":24500,"category":"Default"},{"id":"30","name":"M Aman","salary":24500,"category":"Default"},{"id":"31","name":"M Ishaq","salary":26500,"category":"Default"},{"id":"32","name":"M Farhan Nadwi","salary":24500,"category":"Default"},{"id":"33","name":"M Ubaidur Rahman","salary":21500,"category":"Default"},{"id":"34","name":"M Zahoor","salary":21500,"category":"Default"},{"id":"35","name":"M Mamoon","salary":24500,"category":"Default"},{"id":"36","name":"M Shamshuddin","salary":24500,"category":"Default"},{"id":"37","name":"Q Maaz","salary":21500,"category":"Default"},{"id":"38","name":"Q Salman","salary":21500,"category":"Default"},{"id":"39","name":"M Tanweer","salary":24500,"category":"Default"},{"id":"40","name":"M Noman Patel","salary":21500,"category":"Default"},{"id":"41","name":"M Sajid Patni","salary":24500,"category":"Default"},{"id":"42","name":"M Bilal Tanbe","salary":21500,"category":"Default","fa":true},{"id":"43","name":"M Safwan Nadwi","salary":21500,"category":"Default"},{"id":"44","name":"M Sarfaraz","salary":24500,"category":"Default"},{"id":"45","name":"M Noman Pansare","salary":19500,"category":"Default"},{"id":"46","name":"M Sad","salary":19500,"category":"Default"},{"id":"47","name":"Q Sadre Aalam","salary":13500,"category":"4HOURS","fm":true},{"id":"48","name":"M.Arqam","salary":6750,"category":"2HOURS","fm":true}
 ];
 const DEFAULT_CAT = [
-{category:"Hifz",from:"",to:"",day:"all",morning:"06:30",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6.5,breakS:"09:00",breakE:"09:30"},
-{category:"Diniyat",from:"",to:"",day:"all",morning:"06:45",mEnd:"10:50",afternoon:"14:15",aEnd:"16:15",hours:6.08,breakS:"08:55",breakE:"09:25"},
-{category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6,breakS:"09:00",breakE:"09:30"},
+{category:"Hifz",from:"",to:"",day:"all",morning:"06:30",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6,breakS:"09:00",breakE:"09:30"},
+{category:"Diniyat",from:"",to:"",day:"all",morning:"06:45",mEnd:"10:50",afternoon:"14:15",aEnd:"16:15",hours:5.58,breakS:"08:55",breakE:"09:25"},
+{category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:5.5,breakS:"09:00",breakE:"09:30"},
 {category:"4HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:4,breakS:"",breakE:""},
 {category:"2HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:2,breakS:"",breakE:""}
 ];
@@ -458,13 +462,14 @@ function resolveTarget(staffID,category,iso){
     breakS:breakS?timeToSec(breakS):null, breakE:breakE?timeToSec(breakE):null};
 }
 function overlapSec(aS,aE,bS,bE){ if(aS==null||aE==null||bS==null||bE==null) return 0; const s=Math.max(aS,bS), e=Math.min(aE,bE); return e>s?e-s:0; }
-/* صبح/دوپہر کے شروع اور اُسی کیٹیگری کے اختتام سے گھنٹے خودکار */
-function autoHours(morning,afternoon,mEnd,aEnd){
+/* صبح/دوپہر کے شروع اور اُسی کیٹیگری کے اختتام سے گھنٹے خودکار — وقفے کا وقت گھنٹوں میں سے نکال دیا جاتا ہے */
+function autoHours(morning,afternoon,mEnd,aEnd,breakS,breakE){
   const mE=timeToSec(mEnd),aE=timeToSec(aEnd);
   const m=timeToSec(morning),a=timeToSec(afternoon);
+  const bS=timeToSec(breakS),bE=timeToSec(breakE);
   let h=0;
-  if(m!=null&&mE!=null&&mE>m) h+=(mE-m)/3600;
-  if(a!=null&&aE!=null&&aE>a) h+=(aE-a)/3600;
+  if(m!=null&&mE!=null&&mE>m) h+=(mE-m-overlapSec(m,mE,bS,bE))/3600;
+  if(a!=null&&aE!=null&&aE>a) h+=(aE-a-overlapSec(a,aE,bS,bE))/3600;
   return Math.round(h*100)/100;
 }
 const DAY_OPTS=[["all","ہر دن"],["0","اتوار"],["1","پیر"],["2","منگل"],["3","بدھ"],["4","جمعرات"],["5","جمعہ"],["6","ہفتہ"]];
@@ -660,8 +665,8 @@ function renderCat(){
     const hoursInp=tr.querySelector('[data-f="hours"]');
     tr.querySelectorAll("[data-f]").forEach(inp=>inp.onchange=()=>{
       S.cat[i][inp.dataset.f]=inp.value;
-      if(["morning","afternoon","mEnd","aEnd"].includes(inp.dataset.f)){     // گھنٹے خودکار
-        const h=autoHours(S.cat[i].morning,S.cat[i].afternoon,S.cat[i].mEnd,S.cat[i].aEnd);
+      if(["morning","afternoon","mEnd","aEnd","breakS","breakE"].includes(inp.dataset.f)){     // گھنٹے خودکار
+        const h=autoHours(S.cat[i].morning,S.cat[i].afternoon,S.cat[i].mEnd,S.cat[i].aEnd,S.cat[i].breakS,S.cat[i].breakE);
         if(h>0){ S.cat[i].hours=h; hoursInp.value=h; }
       }
       save(); buildCatList();
@@ -721,6 +726,12 @@ document.getElementById("autoPeriod").onclick=()=>{
 };
 document.getElementById("addStaff").onclick=()=>{ S.staff.push({id:"",name:"",category:"Default",salary:0}); save(); renderStaff(); };
 document.getElementById("addCat").onclick=()=>{ S.cat.push({category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6,breakS:"",breakE:""}); save(); renderCat(); };
+document.getElementById("recalcHours").onclick=()=>{
+  let n=0;
+  S.cat.forEach(c=>{ const h=autoHours(c.morning,c.afternoon,c.mEnd,c.aEnd,c.breakS,c.breakE); if(h>0 && h!==+c.hours){ c.hours=h; n++; } });
+  save(); renderCat();
+  document.getElementById("recalcMsg").innerHTML=`<div class="ok">✓ ${n} قاعدوں کے گھنٹے وقفہ نکال کر دوبارہ شمار ہو گئے۔</div>`;
+};
 document.getElementById("addIdr").onclick=()=>{ S.idr.push({staffID:"",from:"",to:"",day:"all",morning:"",afternoon:"",hours:"",breakS:"",breakE:""}); save(); renderIdr(); };
 document.getElementById("saveSet").onclick=()=>{
   const g=id=>document.getElementById(id).value;

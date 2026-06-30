@@ -1,5 +1,5 @@
 /* اسمارٹ تنخواہ سسٹم — Service Worker (آفلائن) */
-const CACHE = 'payroll-v4';
+const CACHE = 'payroll-v5';
 const ASSETS = [
   './',
   'index.html',
