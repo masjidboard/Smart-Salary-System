@@ -162,11 +162,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
     <h2>کیٹیگری کے اوقات (حفظ / دینیات / ڈیفالٹ وغیرہ)</h2>
     <p class="hint">
       • <b>صبح</b> = صبح کا مقررہ ٹائم (اس کے بعد لیٹ)۔ • <b>صبح ختم</b> / <b>دوپہر ختم</b> = سیشن کب ختم ہوتا ہے۔ • <b>گھنٹے</b> اِنہی شروع و اختتام سے <b>خودکار</b> نکلتے ہیں (چاہیں تو ہاتھ سے بھی بدلیں)۔<br>
-      ہر کیٹیگری کا اپنا اختتام ہو سکتا ہے (مثلاً دینیات کا صبح ختم 10:50)۔ تاریخ خالی = ہمیشہ۔ کسی تاریخ سے بدلے تو نئی سطر + "تاریخ سے"۔ کسی خاص دن کا الگ ٹائم ہو تو "دن" منتخب کریں۔
+      ہر کیٹیگری کا اپنا اختتام ہو سکتا ہے (مثلاً دینیات کا صبح ختم 10:50)۔ تاریخ خالی = ہمیشہ۔ کسی تاریخ سے بدلے تو نئی سطر + "تاریخ سے"۔ کسی خاص دن کا الگ ٹائم ہو تو "دن" منتخب کریں۔<br>
+      <b>وقفہ شروع/ختم:</b> اگر روزانہ ایک مقررہ وقفہ (مثلاً 9:00 سے 9:30) ہے تو یہاں لکھ دیں — جو استاد وقفے کے بعد فنگر لگائے، اُس وقفے کا وقت اُس کی لیٹ کٹوتی میں شامل نہیں ہوگا (صرف وقفے کے بعد کی اصل تاخیر کٹے گی)۔ ضرورت نہ ہو تو خالی چھوڑ دیں۔
     </p>
     <div class="scroll">
       <table id="catTbl"><thead><tr>
-        <th>کیٹیگری</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>صبح ختم</th><th>دوپہر</th><th>دوپہر ختم</th><th>گھنٹے</th><th></th>
+        <th>کیٹیگری</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>صبح ختم</th><th>دوپہر</th><th>دوپہر ختم</th><th>وقفہ شروع</th><th>وقفہ ختم</th><th>گھنٹے</th><th></th>
       </tr></thead><tbody></tbody></table>
     </div>
     <div class="row-actions"><button class="btn btn-green" id="addCat">＋ نیا قاعدہ</button></div>
@@ -183,7 +184,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
     </p>
     <div class="scroll">
       <table id="idrTbl"><thead><tr>
-        <th>ID</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>دوپہر</th><th>گھنٹے</th><th></th>
+        <th>ID</th><th>تاریخ سے</th><th>تاریخ تک</th><th>دن</th><th>صبح</th><th>دوپہر</th><th>وقفہ شروع</th><th>وقفہ ختم</th><th>گھنٹے</th><th></th>
       </tr></thead><tbody></tbody></table>
     </div>
     <div class="row-actions"><button class="btn btn-green" id="addIdr">＋ نیا خصوصی قاعدہ</button></div>
@@ -232,20 +233,22 @@ const DEFAULT_STAFF = [
 {"id":"1","name":"M.Saeed palanpuri","salary":20500,"category":"Hifz"},{"id":"2","name":"Q.Hafizur Rahman","salary":20500,"category":"Hifz"},{"id":"3","name":"M Wasi","salary":20500,"category":"Hifz"},{"id":"4","name":"M Abdulbasit","salary":20500,"category":"Hifz"},{"id":"5","name":"M Saifullah","salary":20500,"category":"Hifz"},{"id":"6","name":"M Zakriya","salary":20500,"category":"Hifz"},{"id":"7","name":"H Bilal","salary":20500,"category":"Hifz"},{"id":"8","name":"M Maaz Sable","salary":19500,"category":"Diniyat"},{"id":"9","name":"M Mohammad Palanpuri","salary":20500,"category":"Hifz"},{"id":"10","name":"M Mohammad Sakri","salary":20500,"category":"Hifz"},{"id":"11","name":"M Muddassir","salary":20500,"category":"Hifz"},{"id":"12","name":"Q Masroor","salary":26500,"category":"Default"},{"id":"13","name":"Q Moazzam","salary":19500,"category":"Diniyat"},{"id":"14","name":"Q Suhail Khan","salary":19500,"category":"Diniyat"},{"id":"15","name":"M Abrar","salary":19500,"category":"Diniyat"},{"id":"16","name":"M Sajid Siddiqi","salary":19500,"category":"Diniyat"},{"id":"17","name":"M Akhtar","salary":21500,"category":"Diniyat"},{"id":"18","name":"M Sabir","salary":19500,"category":"Diniyat"},{"id":"19","name":"M Anas","salary":20500,"category":"Hifz"},{"id":"20","name":"M Huzaifa","salary":21500,"category":"Default"},{"id":"22","name":"M Farhan Zahoor","salary":20500,"category":"Hifz"},{"id":"23","name":"M Mansoor","salary":26500,"category":"Default"},{"id":"24","name":"M Suhail Patel","salary":21500,"category":"Default"},{"id":"25","name":"M Habib","salary":21500,"category":"Default"},{"id":"26","name":"M Faisal","salary":24500,"category":"Default"},{"id":"27","name":"M Saeed","salary":24500,"category":"Default"},{"id":"28","name":"M Salman","salary":24500,"category":"Default"},{"id":"29","name":"M Azhar","salary":24500,"category":"Default"},{"id":"30","name":"M Aman","salary":24500,"category":"Default"},{"id":"31","name":"M Ishaq","salary":26500,"category":"Default"},{"id":"32","name":"M Farhan Nadwi","salary":24500,"category":"Default"},{"id":"33","name":"M Ubaidur Rahman","salary":21500,"category":"Default"},{"id":"34","name":"M Zahoor","salary":21500,"category":"Default"},{"id":"35","name":"M Mamoon","salary":24500,"category":"Default"},{"id":"36","name":"M Shamshuddin","salary":24500,"category":"Default"},{"id":"37","name":"Q Maaz","salary":21500,"category":"Default"},{"id":"38","name":"Q Salman","salary":21500,"category":"Default"},{"id":"39","name":"M Tanweer","salary":24500,"category":"Default"},{"id":"40","name":"M Noman Patel","salary":21500,"category":"Default"},{"id":"41","name":"M Sajid Patni","salary":24500,"category":"Default"},{"id":"42","name":"M Bilal Tanbe","salary":21500,"category":"Default","fa":true},{"id":"43","name":"M Safwan Nadwi","salary":21500,"category":"Default"},{"id":"44","name":"M Sarfaraz","salary":24500,"category":"Default"},{"id":"45","name":"M Noman Pansare","salary":19500,"category":"Default"},{"id":"46","name":"M Sad","salary":19500,"category":"Default"},{"id":"47","name":"Q Sadre Aalam","salary":13500,"category":"4HOURS","fm":true},{"id":"48","name":"M.Arqam","salary":6750,"category":"2HOURS","fm":true}
 ];
 const DEFAULT_CAT = [
-{category:"Hifz",from:"",to:"",day:"all",morning:"06:30",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6.5},
-{category:"Diniyat",from:"",to:"",day:"all",morning:"06:45",mEnd:"10:50",afternoon:"14:15",aEnd:"16:15",hours:6.08},
-{category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6},
-{category:"4HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:4},
-{category:"2HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:2}
+{category:"Hifz",from:"",to:"",day:"all",morning:"06:30",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6.5,breakS:"09:00",breakE:"09:30"},
+{category:"Diniyat",from:"",to:"",day:"all",morning:"06:45",mEnd:"10:50",afternoon:"14:15",aEnd:"16:15",hours:6.08,breakS:"08:55",breakE:"09:25"},
+{category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6,breakS:"09:00",breakE:"09:30"},
+{category:"4HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:4,breakS:"",breakE:""},
+{category:"2HOURS",from:"",to:"",day:"all",morning:"",mEnd:"",afternoon:"14:15",aEnd:"",hours:2,breakS:"",breakE:""}
 ];
 const DEFAULT_IDR = [
-{staffID:"27",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6},
-{staffID:"35",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6},
-{staffID:"31",from:"",to:"",day:"all",morning:"",afternoon:"14:55",hours:6},
-{staffID:"42",from:"",to:"",day:"all",morning:"11:00",afternoon:"",hours:7.75}
+{staffID:"27",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6,breakS:"",breakE:""},
+{staffID:"35",from:"",to:"",day:"all",morning:"07:40",afternoon:"",hours:6,breakS:"",breakE:""},
+{staffID:"31",from:"",to:"",day:"all",morning:"",afternoon:"14:55",hours:6,breakS:"",breakE:""},
+{staffID:"42",from:"",to:"",day:"all",morning:"11:00",afternoon:"",hours:7.75,breakS:"",breakE:""}
 ];
 const DEFAULT_SET = {year:2026,cycleMode:"auto",cycleDays:30,off:5,afoff:4,
   mwS:"05:00",mwE:"11:00",awS:"13:00",awE:"17:00",mEnd:"11:00",aEnd:"16:15"};
+/* جانے پہچانے کیٹیگری ناموں کے لیے ڈیفالٹ وقفہ (پرانے محفوظ شدہ ڈیٹا میں خودکار شامل کرنے کے لیے) */
+const KNOWN_BREAKS={"hifz":["09:00","09:30"],"diniyat":["08:55","09:25"],"default":["09:00","09:30"]};
 
 /* =================== STATE =================== */
 let S = load();
@@ -256,8 +259,15 @@ function load(){
 /* purani saved state mein naye field na hon to bhar do */
 function normalize(s){
   const dM=(s.set&&s.set.mEnd)||"11:00", dA=(s.set&&s.set.aEnd)||"16:15";
-  s.cat=(s.cat||[]).map(c=>({day:"all",mEnd:dM,aEnd:dA,...c}));
-  s.idr=(s.idr||[]).map(o=>({day:"all",...o}));
+  s.cat=(s.cat||[]).map(c=>{
+    const o={day:"all",mEnd:dM,aEnd:dA,breakS:"",breakE:"",...c};
+    if(!o.breakS && !o.breakE){
+      const kb=KNOWN_BREAKS[String(o.category||"").trim().toLowerCase()];
+      if(kb){ o.breakS=kb[0]; o.breakE=kb[1]; }
+    }
+    return o;
+  });
+  s.idr=(s.idr||[]).map(o=>({day:"all",breakS:"",breakE:"",...o}));
   s.set={...DEFAULT_SET,...(s.set||{})};
   return s;
 }
@@ -266,7 +276,8 @@ function clone(x){return JSON.parse(JSON.stringify(x));}
 let ATT = {};      // {dateISO:{staffID:[secOfDay,...]}}
 let FILES = [];    // names imported
 let RESULTS = [];
-let MANUAL = {};   // {staffID: کل دستی منٹ (اس مہینے کے)}
+let MANUAL = {};   // {staffID: کل دستی منٹ کٹوتی (اس مہینے کے)}
+let MANUAL_ADD = {}; // {staffID: کل دستی منٹ اضافہ (اس مہینے کے) — غلطی سے کٹی تنخواہ واپس دینے کے لیے}
 
 /* =================== HELPERS =================== */
 const MONTHS={jan:1,january:1,feb:2,february:2,mar:3,march:3,apr:4,april:4,may:5,jun:6,june:6,jul:7,july:7,aug:8,august:8,sep:9,sept:9,september:9,oct:10,october:10,nov:11,november:11,dec:12,december:12};
@@ -431,18 +442,22 @@ function ruleScore(r,wd){ return (daySpec(r.day)?2:0) + (r.from?1:0); }    // ma
 function sameCat(a,b){ return String(a).trim().toLowerCase()===String(b).trim().toLowerCase(); }
 function resolveTarget(staffID,category,iso){
   const wd=new Date(iso).getDay();
-  let morning=null,afternoon=null,hours=null;
-  // 1) kategory ka behtareen milta hua qaida (makhsoos din + tareekh جیتے)
+  let morning=null,afternoon=null,hours=null,breakS=null,breakE=null;
+  // 1) category ka behtareen milta hua qaida
   let cats=S.cat.filter(c=>sameCat(c.category,category)&&inRange(iso,c.from,c.to)&&dayMatch(c.day,wd));
   cats.sort((a,b)=>ruleScore(b,wd)-ruleScore(a,wd));
-  if(cats[0]){ morning=cats[0].morning||null; afternoon=cats[0].afternoon||null; hours=parseFloat(cats[0].hours)||null; }
-  // 2) fi-ID khususi qaide — sab milte hue lagao (kam fauqiyat پہلے), sirf bhara hua khana
+  if(cats[0]){ morning=cats[0].morning||null; afternoon=cats[0].afternoon||null; hours=parseFloat(cats[0].hours)||null;
+    breakS=cats[0].breakS||null; breakE=cats[0].breakE||null; }
+  // 2) fi-ID khususi qaide -- sab milte hue lagao, sirf bhara hua khana
   let idrs=S.idr.filter(o=>o.staffID===staffID&&inRange(iso,o.from,o.to)&&dayMatch(o.day,wd));
   idrs.sort((a,b)=>ruleScore(a,wd)-ruleScore(b,wd));
-  idrs.forEach(o=>{ if(o.morning) morning=o.morning; if(o.afternoon) afternoon=o.afternoon; if(o.hours) hours=parseFloat(o.hours); });
+  idrs.forEach(o=>{ if(o.morning) morning=o.morning; if(o.afternoon) afternoon=o.afternoon; if(o.hours) hours=parseFloat(o.hours);
+    if(o.breakS) breakS=o.breakS; if(o.breakE) breakE=o.breakE; });
   if(hours==null) hours=6;
-  return {morning:timeToSec(morning),afternoon:timeToSec(afternoon),hours};
+  return {morning:timeToSec(morning),afternoon:timeToSec(afternoon),hours,
+    breakS:breakS?timeToSec(breakS):null, breakE:breakE?timeToSec(breakE):null};
 }
+function overlapSec(aS,aE,bS,bE){ if(aS==null||aE==null||bS==null||bE==null) return 0; const s=Math.max(aS,bS), e=Math.min(aE,bE); return e>s?e-s:0; }
 /* صبح/دوپہر کے شروع اور اُسی کیٹیگری کے اختتام سے گھنٹے خودکار */
 function autoHours(morning,afternoon,mEnd,aEnd){
   const mE=timeToSec(mEnd),aE=timeToSec(aEnd);
@@ -494,8 +509,16 @@ function calculate(){
       let mp=null,ap=null;
       for(const p of punches){ if(mp===null && p>=mwS && p<=mUp) mp=p; if(ap===null && p>=awS && p<=awE) ap=p; }
       let dl=0,mLate=0,aLate=0;
-      if(!s.fm && tg.morning!=null && mp!=null && mp>tg.morning){ mLate=mp-tg.morning; dl+=mLate; }
-      if(!(afoff>=0&&wd===afoff) && !s.fa && tg.afternoon!=null && ap!=null && ap>tg.afternoon){ aLate=ap-tg.afternoon; dl+=aLate; }
+      if(!s.fm && tg.morning!=null && mp!=null && mp>tg.morning){
+        mLate=mp-tg.morning;
+        mLate=Math.max(0, mLate-overlapSec(tg.morning,mp,tg.breakS,tg.breakE)); // مقررہ وقفہ لیٹ شمار سے نکال دیں
+        dl+=mLate;
+      }
+      if(!(afoff>=0&&wd===afoff) && !s.fa && tg.afternoon!=null && ap!=null && ap>tg.afternoon){
+        aLate=ap-tg.afternoon;
+        aLate=Math.max(0, aLate-overlapSec(tg.afternoon,ap,tg.breakS,tg.breakE)); // مقررہ وقفہ لیٹ شمار سے نکال دیں
+        dl+=aLate;
+      }
       if(dl>0) lateDays++;
       lateSec+=dl;
       const dailySec=(tg.hours||6)*3600;
@@ -503,15 +526,19 @@ function calculate(){
       deduct+=dl*perSec;
       if(dl>0) detail.push([iso,s.id,s.name,mp!=null?secToHMS(mp).slice(0,5):"",ap!=null?secToHMS(ap).slice(0,5):"",Math.round(mLate/60),Math.round(aLate/60),Math.round(dl/60)]);
     });
-    // دستی منٹ (پورے مہینے کا کل) — اسی ریٹ سے کٹیں (منٹ×60×فی سیکنڈ ریٹ)
+    // دستی منٹ کٹوتی (پورے مہینے کا کل) — اسی ریٹ سے کٹیں (منٹ×60×فی سیکنڈ ریٹ)
     const manualMin=+MANUAL[s.id]||0;
     const repHours=resolveTarget(s.id,s.category,dates[0]).hours||6;
     const repPerSec=(repHours*3600)>0?(s.salary/cycleDays/(repHours*3600)):0;
     const manualDed=manualMin*60*repPerSec;
     deduct=Math.round((deduct+manualDed)*100)/100;
+    // دستی منٹ اضافہ — اگر غلطی سے کسی کی تنخواہ کٹ جائے تو اسی ریٹ سے واپس جوڑ دیں
+    const manualAddMin=+MANUAL_ADD[s.id]||0;
+    const manualAdd=Math.round(manualAddMin*60*repPerSec*100)/100;
     RESULTS.push({id:s.id,name:s.name,cat:s.category,salary:s.salary,cycleDays,perDay:Math.round(s.salary/cycleDays*100)/100,
       present,lateDays,lateSec,lateHMS:secToHMS(lateSec),manualMin,manualDed:Math.round(manualDed*100)/100,
-      deduct,net:Math.round((s.salary-deduct)*100)/100});
+      manualAddMin,manualAdd,
+      deduct,net:Math.round((s.salary-deduct+manualAdd)*100)/100});
   });
   window.__detail=detail; window.__cycleDays=cycleDays;
   renderResults(unknown,dates.length);
@@ -521,6 +548,7 @@ function calculate(){
 function renderResults(unknown,nDays){
   const totSal=RESULTS.reduce((a,r)=>a+r.salary,0);
   const totDed=RESULTS.reduce((a,r)=>a+r.deduct,0);
+  const totAdd=RESULTS.reduce((a,r)=>a+(r.manualAdd||0),0);
   const totNet=RESULTS.reduce((a,r)=>a+r.net,0);
   const k=document.getElementById("kpis"); k.style.display="grid";
   k.innerHTML=`
@@ -529,6 +557,7 @@ function renderResults(unknown,nDays){
     <div class="kpi"><div class="v">${RESULTS.length}</div><div class="l">اساتذہ</div></div>
     <div class="kpi"><div class="v">${fmt(totSal)}</div><div class="l">کل بنیادی</div></div>
     <div class="kpi"><div class="v" style="color:var(--red)">${fmt(totDed)}</div><div class="l">کل کٹوتی</div></div>
+    <div class="kpi"><div class="v" style="color:var(--green2)">${fmt(totAdd)}</div><div class="l">کل دستی اضافہ</div></div>
     <div class="kpi"><div class="v" style="color:var(--green2)">${fmt(totNet)}</div><div class="l">کل قابلِ ادائیگی</div></div>`;
   let warn="";
   if(unknown.size) warn=`<div class="warn">یہ ID حاضری میں ہیں مگر اساتذہ کی فہرست میں نہیں — ان کا حساب نہیں ہوا: <b>${[...unknown].join(", ")}</b>۔ اگر چاہیں تو "اساتذہ" میں شامل کریں۔</div>`;
@@ -539,33 +568,40 @@ function renderResults(unknown,nDays){
     <td class="num right">${r.lateHMS}</td>
     <td><input type="number" class="num w-sm" style="min-width:58px" value="${r.manualMin||0}" data-mid="${r.id}"></td>
     <td class="num right ${r.deduct>0?'neg':''}">${fmt(r.deduct)}</td>
+    <td><input type="number" class="num w-sm" style="min-width:58px" value="${r.manualAddMin||0}" data-aid="${r.id}"></td>
+    <td class="num right pos">${fmt(r.manualAdd||0)}</td>
     <td class="num right pos">${fmt(r.net)}</td>
   </tr>`).join("");
   document.getElementById("resultArea").innerHTML=warn+`
     <div class="scroll" style="margin-top:8px"><table><thead><tr>
       <th>ID</th><th>نام</th><th>کیٹیگری</th><th>بنیادی تنخواہ</th><th>حاضر دن</th><th>لیٹ دن</th>
-      <th>کل تاخیر (گ:م:س)</th><th>دستی منٹ</th><th>کٹوتی</th><th>خالص تنخواہ</th>
+      <th>کل تاخیر (گ:م:س)</th><th>دستی کٹوتی منٹ</th><th>کٹوتی</th><th>دستی اضافہ منٹ</th><th>اضافہ</th><th>خالص تنخواہ</th>
     </tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="mini" style="margin-top:8px">چلتا مہینہ: <b>${window.__cycleMonthLabel||""}</b> • تقسیم کے دن: ${window.__cycleDays} • <b>دستی منٹ</b> = کسی استاد کے کل اضافی لیٹ منٹ؛ بھرتے ہی کٹوتی و خالص تنخواہ خود اپڈیٹ ہو جائے گی۔ فنگر نہ لگنے والے دن اور چھٹی کے دن کٹوتی میں شامل نہیں۔</p>`;
-  // دستی منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
+    <p class="mini" style="margin-top:8px">چلتا مہینہ: <b>${window.__cycleMonthLabel||""}</b> • تقسیم کے دن: ${window.__cycleDays} • <b>دستی کٹوتی منٹ</b> = کسی استاد کے کل اضافی لیٹ منٹ (تنخواہ سے کٹے گا)۔ <b>دستی اضافہ منٹ</b> = اگر غلطی سے کسی کی تنخواہ کٹ گئی ہو تو یہاں منٹ لکھیں، اسی ریٹ سے واپس جُڑ کر خالص تنخواہ میں اضافہ ہو جائے گا۔ بھرتے ہی خود اپڈیٹ ہو جائے گا۔ فنگر نہ لگنے والے دن اور چھٹی کے دن کٹوتی میں شامل نہیں۔</p>`;
+  // دستی کٹوتی منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
   document.querySelectorAll("[data-mid]").forEach(inp=>inp.onchange=()=>{
     MANUAL[inp.dataset.mid]=+inp.value||0; calculate();
+  });
+  // دستی اضافہ منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
+  document.querySelectorAll("[data-aid]").forEach(inp=>inp.onchange=()=>{
+    MANUAL_ADD[inp.dataset.aid]=+inp.value||0; calculate();
   });
 }
 
 /* =================== EXPORT EXCEL =================== */
 function exportXLSX(){
   if(!RESULTS.length){ return; }
-  const head=["ID","نام","کیٹیگری","بنیادی تنخواہ","تقسیم دن","فی دن","حاضر دن","لیٹ دن","کل تاخیر سیکنڈ","کل تاخیر (گ:م:س)","دستی منٹ","دستی کٹوتی","کل کٹوتی","خالص تنخواہ"];
+  const head=["ID","نام","کیٹیگری","بنیادی تنخواہ","تقسیم دن","فی دن","حاضر دن","لیٹ دن","کل تاخیر سیکنڈ","کل تاخیر (گ:م:س)","دستی کٹوتی منٹ","دستی کٹوتی","کل کٹوتی","دستی اضافہ منٹ","دستی اضافہ","خالص تنخواہ"];
   const aoa=[head]; 
-  RESULTS.forEach(r=>aoa.push([r.id,r.name,r.cat,r.salary,r.cycleDays,r.perDay,r.present,r.lateDays,r.lateSec,r.lateHMS,r.manualMin||0,r.manualDed||0,r.deduct,r.net]));
+  RESULTS.forEach(r=>aoa.push([r.id,r.name,r.cat,r.salary,r.cycleDays,r.perDay,r.present,r.lateDays,r.lateSec,r.lateHMS,r.manualMin||0,r.manualDed||0,r.deduct,r.manualAddMin||0,r.manualAdd||0,r.net]));
   const tot=["","","کل میزان","",
     "","","","","","","","",
-    Math.round(RESULTS.reduce((a,r)=>a+r.deduct,0)*100)/100,
+    Math.round(RESULTS.reduce((a,r)=>a+r.deduct,0)*100)/100,"",
+    Math.round(RESULTS.reduce((a,r)=>a+(r.manualAdd||0),0)*100)/100,
     Math.round(RESULTS.reduce((a,r)=>a+r.net,0)*100)/100];
   aoa.push([]); aoa.push(tot);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:9},{wch:11},{wch:12},{wch:14}];
+  ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:11},{wch:11},{wch:12},{wch:11},{wch:11},{wch:14}];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Salary Report");
   const dh=[["تاریخ","ID","نام","صبح پنچ","دوپہر پنچ","صبح لیٹ منٹ","دوپہر لیٹ منٹ","کل لیٹ منٹ"]].concat(window.__detail||[]);
   const ws2=XLSX.utils.aoa_to_sheet(dh); ws2["!cols"]=[{wch:12},{wch:6},{wch:22},{wch:10},{wch:10},{wch:12},{wch:12},{wch:10}];
@@ -617,6 +653,8 @@ function renderCat(){
       <td><input type="time" value="${c.mEnd||""}" data-f="mEnd"></td>
       <td><input type="time" value="${c.afternoon||""}" data-f="afternoon"></td>
       <td><input type="time" value="${c.aEnd||""}" data-f="aEnd"></td>
+      <td><input type="time" value="${c.breakS||""}" data-f="breakS"></td>
+      <td><input type="time" value="${c.breakE||""}" data-f="breakE"></td>
       <td><input type="number" step="0.01" class="w-sm num" value="${c.hours}" data-f="hours"></td>
       <td><button class="btn-red" data-del="${i}">حذف</button></td>`;
     const hoursInp=tr.querySelector('[data-f="hours"]');
@@ -643,6 +681,8 @@ function renderIdr(){
       <td>${daySelect(o.day||"all")}</td>
       <td><input type="time" value="${o.morning||""}" data-f="morning"></td>
       <td><input type="time" value="${o.afternoon||""}" data-f="afternoon"></td>
+      <td><input type="time" value="${o.breakS||""}" data-f="breakS"></td>
+      <td><input type="time" value="${o.breakE||""}" data-f="breakE"></td>
       <td><input type="number" step="0.01" class="w-sm num" value="${o.hours||""}" data-f="hours"></td>
       <td><button class="btn-red" data-del="${i}">حذف</button></td>`;
     tr.querySelectorAll("[data-f]").forEach(inp=>inp.onchange=()=>{ S.idr[i][inp.dataset.f]=inp.value; save(); });
@@ -673,15 +713,15 @@ drop.addEventListener("drop",e=>handleFiles(e.dataTransfer.files));
 document.getElementById("calcBtn").onclick=calculate;
 document.getElementById("xlsxBtn").onclick=exportXLSX;
 document.getElementById("printBtn").onclick=()=>window.print();
-document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true;document.getElementById("periodFrom").value="";document.getElementById("periodTo").value=""; };
+document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};MANUAL_ADD={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true;document.getElementById("periodFrom").value="";document.getElementById("periodTo").value=""; };
 document.getElementById("autoPeriod").onclick=()=>{
   const dates=Object.keys(ATT).sort();
   const ref=dates.length?dates[dates.length-1]:new Date().toISOString().slice(0,10);
   const c=computeCycleRange(ref); setPeriodFields(c.from,c.to);
 };
 document.getElementById("addStaff").onclick=()=>{ S.staff.push({id:"",name:"",category:"Default",salary:0}); save(); renderStaff(); };
-document.getElementById("addCat").onclick=()=>{ S.cat.push({category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6}); save(); renderCat(); };
-document.getElementById("addIdr").onclick=()=>{ S.idr.push({staffID:"",from:"",to:"",day:"all",morning:"",afternoon:"",hours:""}); save(); renderIdr(); };
+document.getElementById("addCat").onclick=()=>{ S.cat.push({category:"Default",from:"",to:"",day:"all",morning:"07:00",mEnd:"11:00",afternoon:"14:15",aEnd:"16:15",hours:6,breakS:"",breakE:""}); save(); renderCat(); };
+document.getElementById("addIdr").onclick=()=>{ S.idr.push({staffID:"",from:"",to:"",day:"all",morning:"",afternoon:"",hours:"",breakS:"",breakE:""}); save(); renderIdr(); };
 document.getElementById("saveSet").onclick=()=>{
   const g=id=>document.getElementById(id).value;
   S.set={year:+g("s-year")||2026,cycleMode:g("s-cycleMode"),cycleDays:+g("s-cycleDays")||30,off:+g("s-off"),afoff:+g("s-afoff"),
