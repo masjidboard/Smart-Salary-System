@@ -217,7 +217,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px}
       <div class="field"><label>دوپہر کے پنچ کی کھڑکی (شروع)</label><input type="time" id="s-awS"></div>
       <div class="field"><label>دوپہر کے پنچ کی کھڑکی (اختتام)</label><input type="time" id="s-awE"></div>
     </div>
-    <p class="hint" style="margin-top:12px">📌 <b>اختتام</b> = سیشن کب ختم ہوتا ہے (گھنٹے خودکار نکالنے کے لیے)۔ <b>کھڑکی</b> = اس وقت کے اندر والا پنچ ہی "آمد" مانا جائے گا (مشین کے فالتو پنچ سے بچاؤ)۔ عام طور پر انہیں چھیڑنے کی ضرورت نہیں۔</p>
+    <p class="hint" style="margin-top:12px">📌 <b>اختتام</b> = سیشن کب ختم ہوتا ہے (گھنٹے خودکار نکالنے کے لیے)۔ <b>کھڑکی</b> = اس وقت کے اندر والا پنچ ہی "آمد" مانا جائے گا (مشین کے فالتو پنچ سے بچاؤ)۔ عام طور پر انہیں چھیڑنے کی ضرورت نہیں۔ "ماہانہ حاضری" شیٹ میں <b>رات</b> کا کالم خودکار ہے — دوپہر کی کھڑکی ختم ہونے کے بعد کا پہلا پنچ رات شمار ہو جاتا ہے، اس کی الگ سیٹنگ کی ضرورت نہیں۔</p>
     <div class="row-actions">
       <button class="btn btn-green" id="saveSet">💾 محفوظ کریں</button>
       <button class="btn btn-ghost" id="backup">⬇️ سیٹنگ بیک اپ (JSON)</button>
@@ -473,6 +473,7 @@ function autoHours(morning,afternoon,mEnd,aEnd,breakS,breakE){
   return Math.round(h*100)/100;
 }
 const DAY_OPTS=[["all","ہر دن"],["0","اتوار"],["1","پیر"],["2","منگل"],["3","بدھ"],["4","جمعرات"],["5","جمعہ"],["6","ہفتہ"]];
+const DAY_NAMES_UR=["اتوار","پیر","منگل","بدھ","جمعرات","جمعہ","ہفتہ"];
 function daySelect(sel){ return `<select data-f="day">`+DAY_OPTS.map(([v,l])=>`<option value="${v}" ${String(sel)===v?"selected":""}>${l}</option>`).join("")+`</select>`; }
 
 /* =================== CALCULATE =================== */
@@ -494,7 +495,7 @@ function calculate(){
   const off=+S.set.off, afoff=+S.set.afoff;
   const staffMap={}; S.staff.forEach(s=>staffMap[s.id]=s);
 
-  RESULTS=[]; const detail=[]; const unknown=new Set();
+  RESULTS=[]; const detail=[]; const monthly=[]; const unknown=new Set();
   // detect attendance ids not in master
   dates.forEach(iso=>Object.keys(ATT[iso]).forEach(id=>{ if(!staffMap[id]) unknown.add(id); }));
 
@@ -502,17 +503,26 @@ function calculate(){
     let lateSec=0,deduct=0,present=0,lateDays=0;
     dates.forEach(iso=>{
       const wd=new Date(iso).getDay();
-      if(off>=0 && wd===off) return; // full holiday
+      const dName=DAY_NAMES_UR[wd];
+      if(off>=0 && wd===off){ monthly.push([iso,dName,s.id,s.name,"چھٹی","چھٹی","چھٹی"]); return; } // full holiday
       const punches=ATT[iso][s.id];
-      if(!punches||!punches.length) return; // finger not registered -> forgive
+      if(!punches||!punches.length){ monthly.push([iso,dName,s.id,s.name,"نہیں لگایا","نہیں لگایا","نہیں لگایا"]); return; } // finger not registered -> forgive
       present++;
       const tg=resolveTarget(s.id,s.category,iso);
       // صبح کی کھڑکی استاد کے اپنے مقررہ ٹائم کے مطابق بڑھ جائے (دیر سے آنے والوں جیسے ID 42 کے لیے)
       // تاکہ ان کی آمد چھوٹ نہ جائے؛ دوپہر کی کھڑکی سے ٹکراؤ نہ ہو۔
       let mUp=mwE;
       if(tg.morning!=null) mUp=Math.min(awS, Math.max(mwE, tg.morning + 120*60));
-      let mp=null,ap=null;
-      for(const p of punches){ if(mp===null && p>=mwS && p<=mUp) mp=p; if(ap===null && p>=awS && p<=awE) ap=p; }
+      let mp=null,ap=null,np=null;
+      for(const p of punches){
+        if(mp===null && p>=mwS && p<=mUp) mp=p;
+        if(ap===null && p>=awS && p<=awE) ap=p;
+        if(np===null && awE!=null && p>awE) np=p;
+      }
+      monthly.push([iso,dName,s.id,s.name,
+        mp!=null?secToHMS(mp).slice(0,5):"نہیں لگایا",
+        ap!=null?secToHMS(ap).slice(0,5):"نہیں لگایا",
+        np!=null?secToHMS(np).slice(0,5):"نہیں لگایا"]);
       let dl=0,mLate=0,aLate=0;
       if(!s.fm && tg.morning!=null && mp!=null && mp>tg.morning){
         mLate=mp-tg.morning;
@@ -545,7 +555,7 @@ function calculate(){
       manualAddMin,manualAdd,
       deduct,net:Math.round((s.salary-deduct+manualAdd)*100)/100});
   });
-  window.__detail=detail; window.__cycleDays=cycleDays;
+  window.__detail=detail; window.__monthly=monthly; window.__cycleDays=cycleDays;
   renderResults(unknown,dates.length);
   document.getElementById("xlsxBtn").disabled=false;
 }
@@ -608,9 +618,12 @@ function exportXLSX(){
   const ws=XLSX.utils.aoa_to_sheet(aoa);
   ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:11},{wch:11},{wch:12},{wch:11},{wch:11},{wch:14}];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Salary Report");
+  const mh=[["تاریخ","دن","ID","نام","صبح","دوپہر","رات"]].concat(window.__monthly||[]);
+  const ws2=XLSX.utils.aoa_to_sheet(mh); ws2["!cols"]=[{wch:12},{wch:10},{wch:6},{wch:22},{wch:12},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb,ws2,"Monthly Attendance");
   const dh=[["تاریخ","ID","نام","صبح پنچ","دوپہر پنچ","صبح لیٹ منٹ","دوپہر لیٹ منٹ","کل لیٹ منٹ"]].concat(window.__detail||[]);
-  const ws2=XLSX.utils.aoa_to_sheet(dh); ws2["!cols"]=[{wch:12},{wch:6},{wch:22},{wch:10},{wch:10},{wch:12},{wch:12},{wch:10}];
-  XLSX.utils.book_append_sheet(wb,ws2,"Daily Detail");
+  const ws3=XLSX.utils.aoa_to_sheet(dh); ws3["!cols"]=[{wch:12},{wch:6},{wch:22},{wch:10},{wch:10},{wch:12},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws3,"Late Days Only");
   const dates=Object.keys(ATT).sort();
   const tag=dates.length?`${dates[0]}_to_${dates[dates.length-1]}`:"report";
   XLSX.writeFile(wb,`Salary_${tag}.xlsx`);
