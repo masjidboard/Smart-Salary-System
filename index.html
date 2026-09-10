@@ -477,7 +477,7 @@ const DAY_NAMES_UR=["اتوار","پیر","منگل","بدھ","جمعرات","ج
 function daySelect(sel){ return `<select data-f="day">`+DAY_OPTS.map(([v,l])=>`<option value="${v}" ${String(sel)===v?"selected":""}>${l}</option>`).join("")+`</select>`; }
 
 /* =================== CALCULATE =================== */
-function calculate(){
+function calculate(patchOnly){
   const allDates=Object.keys(ATT).sort();
   if(!allDates.length){ document.getElementById("importMsg").innerHTML=`<div class="warn">پہلے فائلیں امپورٹ کریں۔</div>`; return; }
   // ===== تنخواہ کی مدت: صارف کی منتخب کردہ "از تاریخ" تا "تا تاریخ" (ڈیفالٹ: پچھلے مہینے کی 10 سے اِس مہینے کی 9) =====
@@ -553,17 +553,21 @@ function calculate(){
     RESULTS.push({id:s.id,name:s.name,cat:s.category,salary:s.salary,cycleDays,perDay:Math.round(s.salary/cycleDays*100)/100,
       present,lateDays,lateSec,lateHMS:secToHMS(lateSec),manualMin,manualDed:Math.round(manualDed*100)/100,
       manualAddMin,manualAdd,
-      deduct,net:Math.round((s.salary-deduct+manualAdd)*100)/100});
+      deduct,net:Math.round((s.salary-deduct+manualAdd)*100)/100,
+      netDed:Math.round((deduct-manualAdd)*100)/100});
   });
   window.__detail=detail; window.__monthly=monthly; window.__cycleDays=cycleDays;
-  renderResults(unknown,dates.length);
+  // دستی منٹ کی تبدیلی پر پورا ٹیبل دوبارہ نہ بنائیں — صرف بدلے ہوئے خانے اپڈیٹ کریں
+  if(!(patchOnly && patchResults())) renderResults(unknown,dates.length);
   document.getElementById("xlsxBtn").disabled=false;
 }
 
-function renderResults(unknown,nDays){
+function renderKpis(){
+  const nDays=window.__nDays||0;
   const totSal=RESULTS.reduce((a,r)=>a+r.salary,0);
   const totDed=RESULTS.reduce((a,r)=>a+r.deduct,0);
   const totAdd=RESULTS.reduce((a,r)=>a+(r.manualAdd||0),0);
+  const totNetDed=RESULTS.reduce((a,r)=>a+(r.netDed||0),0);
   const totNet=RESULTS.reduce((a,r)=>a+r.net,0);
   const k=document.getElementById("kpis"); k.style.display="grid";
   k.innerHTML=`
@@ -573,50 +577,94 @@ function renderResults(unknown,nDays){
     <div class="kpi"><div class="v">${fmt(totSal)}</div><div class="l">کل بنیادی</div></div>
     <div class="kpi"><div class="v" style="color:var(--red)">${fmt(totDed)}</div><div class="l">کل کٹوتی</div></div>
     <div class="kpi"><div class="v" style="color:var(--green2)">${fmt(totAdd)}</div><div class="l">کل دستی اضافہ</div></div>
+    <div class="kpi"><div class="v" style="color:var(--red)">${fmt(totNetDed)}</div><div class="l">اصل کٹوتی (اضافہ منہا)</div></div>
     <div class="kpi"><div class="v" style="color:var(--green2)">${fmt(totNet)}</div><div class="l">کل قابلِ ادائیگی</div></div>`;
+}
+
+function renderResults(unknown,nDays){
+  window.__nDays=nDays;
+  renderKpis();
+  // دوبارہ بناتے وقت اسکرول کی جگہ اور فوکس یاد رکھیں
+  const _sy=window.scrollY||document.documentElement.scrollTop||0;
+  const _oc=document.querySelector("#resultArea .scroll");
+  const _sl=_oc?_oc.scrollLeft:0, _st=_oc?_oc.scrollTop:0;
+  const _ae=document.activeElement;
+  const _fk=_ae&&_ae.dataset?(_ae.dataset.mid?["mid",_ae.dataset.mid]:(_ae.dataset.aid?["aid",_ae.dataset.aid]:null)):null;
   let warn="";
   if(unknown.size) warn=`<div class="warn">یہ ID حاضری میں ہیں مگر اساتذہ کی فہرست میں نہیں — ان کا حساب نہیں ہوا: <b>${[...unknown].join(", ")}</b>۔ اگر چاہیں تو "اساتذہ" میں شامل کریں۔</div>`;
-  const rows=RESULTS.map(r=>`<tr>
+  const rows=RESULTS.map(r=>`<tr data-row="1">
     <td class="num">${r.id}</td><td>${r.name}</td><td>${r.cat}</td>
     <td class="num right">${fmt(r.salary)}</td>
     <td class="num">${r.present}</td><td class="num">${r.lateDays}</td>
     <td class="num right">${r.lateHMS}</td>
     <td><input type="number" class="num w-sm" style="min-width:58px" value="${r.manualMin||0}" data-mid="${r.id}"></td>
-    <td class="num right ${r.deduct>0?'neg':''}">${fmt(r.deduct)}</td>
+    <td class="num right ${r.deduct>0?'neg':''}" data-c="deduct">${fmt(r.deduct)}</td>
     <td><input type="number" class="num w-sm" style="min-width:58px" value="${r.manualAddMin||0}" data-aid="${r.id}"></td>
-    <td class="num right pos">${fmt(r.manualAdd||0)}</td>
-    <td class="num right pos">${fmt(r.net)}</td>
+    <td class="num right pos" data-c="add">${fmt(r.manualAdd||0)}</td>
+    <td class="num right ${r.netDed>0?'neg':''}" data-c="netded">${fmt(r.netDed||0)}</td>
+    <td class="num right pos" data-c="net">${fmt(r.net)}</td>
   </tr>`).join("");
   document.getElementById("resultArea").innerHTML=warn+`
     <div class="scroll" style="margin-top:8px"><table><thead><tr>
       <th>ID</th><th>نام</th><th>کیٹیگری</th><th>بنیادی تنخواہ</th><th>حاضر دن</th><th>لیٹ دن</th>
-      <th>کل تاخیر (گ:م:س)</th><th>دستی کٹوتی منٹ</th><th>کٹوتی</th><th>دستی اضافہ منٹ</th><th>اضافہ</th><th>خالص تنخواہ</th>
+      <th>کل تاخیر (گ:م:س)</th><th>دستی کٹوتی منٹ</th><th>کٹوتی</th><th>دستی اضافہ منٹ</th><th>اضافہ</th><th>اصل کٹوتی</th><th>خالص تنخواہ</th>
     </tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="mini" style="margin-top:8px">چلتا مہینہ: <b>${window.__cycleMonthLabel||""}</b> • تقسیم کے دن: ${window.__cycleDays} • <b>دستی کٹوتی منٹ</b> = کسی استاد کے کل اضافی لیٹ منٹ (تنخواہ سے کٹے گا)۔ <b>دستی اضافہ منٹ</b> = اگر غلطی سے کسی کی تنخواہ کٹ گئی ہو تو یہاں منٹ لکھیں، اسی ریٹ سے واپس جُڑ کر خالص تنخواہ میں اضافہ ہو جائے گا۔ بھرتے ہی خود اپڈیٹ ہو جائے گا۔ فنگر نہ لگنے والے دن اور چھٹی کے دن کٹوتی میں شامل نہیں۔</p>`;
+    <p class="mini" style="margin-top:8px">چلتا مہینہ: <b>${window.__cycleMonthLabel||""}</b> • تقسیم کے دن: ${window.__cycleDays} • <b>دستی کٹوتی منٹ</b> = کسی استاد کے کل اضافی لیٹ منٹ (تنخواہ سے کٹے گا)۔ <b>دستی اضافہ منٹ</b> = اگر غلطی سے کسی کی تنخواہ کٹ گئی ہو تو یہاں منٹ لکھیں، اسی ریٹ سے واپس جُڑ کر خالص تنخواہ میں اضافہ ہو جائے گا۔ <b>اصل کٹوتی</b> = کٹوتی − اضافہ، یعنی بنیادی تنخواہ میں سے حقیقتاً جتنی رقم کم ہوئی (بنیادی − خالص)۔ بھرتے ہی خود اپڈیٹ ہو جائے گا۔ فنگر نہ لگنے والے دن اور چھٹی کے دن کٹوتی میں شامل نہیں۔</p>`;
   // دستی کٹوتی منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
   document.querySelectorAll("[data-mid]").forEach(inp=>inp.onchange=()=>{
-    MANUAL[inp.dataset.mid]=+inp.value||0; calculate();
+    MANUAL[inp.dataset.mid]=+inp.value||0; calculate(true);
   });
   // دستی اضافہ منٹ تبدیل ہوں تو محفوظ کر کے دوبارہ حساب
   document.querySelectorAll("[data-aid]").forEach(inp=>inp.onchange=()=>{
-    MANUAL_ADD[inp.dataset.aid]=+inp.value||0; calculate();
+    MANUAL_ADD[inp.dataset.aid]=+inp.value||0; calculate(true);
   });
+  // اسکرول اور فوکس واپس اپنی جگہ
+  const _nc=document.querySelector("#resultArea .scroll");
+  if(_nc){ _nc.scrollLeft=_sl; _nc.scrollTop=_st; }
+  if(_fk){
+    const t=document.querySelector('[data-'+_fk[0]+'="'+String(_fk[1]).replace(/"/g,'')+'"]');
+    if(t) try{ t.focus({preventScroll:true}); }catch(e){ t.focus(); }
+  }
+  window.scrollTo(0,_sy);
+  requestAnimationFrame(()=>window.scrollTo(0,_sy));
+}
+
+/* صرف بدلے ہوئے خانے اپڈیٹ کریں — نہ ٹیبل دوبارہ بنے، نہ اسکرول ہلے، نہ فوکس ٹوٹے */
+function patchResults(){
+  const trs=document.querySelectorAll("#resultArea tr[data-row]");
+  if(!trs.length || trs.length!==RESULTS.length) return false;
+  RESULTS.forEach((r,i)=>{
+    const tr=trs[i];
+    const put=(key,val,isNeg)=>{
+      const td=tr.querySelector('[data-c="'+key+'"]');
+      if(!td) return;
+      td.textContent=fmt(val);
+      td.classList.toggle("neg",!!isNeg);
+    };
+    put("deduct",r.deduct,r.deduct>0);
+    put("add",r.manualAdd||0,false);
+    put("netded",r.netDed||0,r.netDed>0);
+    put("net",r.net,false);
+  });
+  renderKpis();
+  return true;
 }
 
 /* =================== EXPORT EXCEL =================== */
 function exportXLSX(){
   if(!RESULTS.length){ return; }
-  const head=["ID","نام","کیٹیگری","بنیادی تنخواہ","تقسیم دن","فی دن","حاضر دن","لیٹ دن","کل تاخیر سیکنڈ","کل تاخیر (گ:م:س)","دستی کٹوتی منٹ","دستی کٹوتی","کل کٹوتی","دستی اضافہ منٹ","دستی اضافہ","خالص تنخواہ"];
+  const head=["ID","نام","کیٹیگری","بنیادی تنخواہ","تقسیم دن","فی دن","حاضر دن","لیٹ دن","کل تاخیر سیکنڈ","کل تاخیر (گ:م:س)","دستی کٹوتی منٹ","دستی کٹوتی","کل کٹوتی","دستی اضافہ منٹ","دستی اضافہ","اصل کٹوتی","خالص تنخواہ"];
   const aoa=[head]; 
-  RESULTS.forEach(r=>aoa.push([r.id,r.name,r.cat,r.salary,r.cycleDays,r.perDay,r.present,r.lateDays,r.lateSec,r.lateHMS,r.manualMin||0,r.manualDed||0,r.deduct,r.manualAddMin||0,r.manualAdd||0,r.net]));
+  RESULTS.forEach(r=>aoa.push([r.id,r.name,r.cat,r.salary,r.cycleDays,r.perDay,r.present,r.lateDays,r.lateSec,r.lateHMS,r.manualMin||0,r.manualDed||0,r.deduct,r.manualAddMin||0,r.manualAdd||0,r.netDed||0,r.net]));
   const tot=["","","کل میزان","",
     "","","","","","","","",
     Math.round(RESULTS.reduce((a,r)=>a+r.deduct,0)*100)/100,"",
     Math.round(RESULTS.reduce((a,r)=>a+(r.manualAdd||0),0)*100)/100,
+    Math.round(RESULTS.reduce((a,r)=>a+(r.netDed||0),0)*100)/100,
     Math.round(RESULTS.reduce((a,r)=>a+r.net,0)*100)/100];
   aoa.push([]); aoa.push(tot);
   const ws=XLSX.utils.aoa_to_sheet(aoa);
-  ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:11},{wch:11},{wch:12},{wch:11},{wch:11},{wch:14}];
+  ws["!cols"]=[{wch:6},{wch:24},{wch:10},{wch:14},{wch:9},{wch:9},{wch:8},{wch:8},{wch:14},{wch:14},{wch:11},{wch:11},{wch:12},{wch:11},{wch:11},{wch:12},{wch:14}];
   const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,"Salary Report");
   const mh=[["تاریخ","دن","ID","نام","صبح","دوپہر","رات"]].concat(window.__monthly||[]);
   const ws2=XLSX.utils.aoa_to_sheet(mh); ws2["!cols"]=[{wch:12},{wch:10},{wch:6},{wch:22},{wch:12},{wch:12},{wch:12}];
@@ -728,7 +776,7 @@ file.onchange=e=>handleFiles(e.target.files);
 ["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
 drop.addEventListener("drop",e=>handleFiles(e.dataTransfer.files));
-document.getElementById("calcBtn").onclick=calculate;
+document.getElementById("calcBtn").onclick=()=>calculate();
 document.getElementById("xlsxBtn").onclick=exportXLSX;
 document.getElementById("printBtn").onclick=()=>window.print();
 document.getElementById("clearFiles").onclick=()=>{ ATT={};FILES=[];MANUAL={};MANUAL_ADD={};renderFiles();document.getElementById("importMsg").innerHTML="";document.getElementById("resultArea").innerHTML="";document.getElementById("kpis").style.display="none";document.getElementById("xlsxBtn").disabled=true;document.getElementById("periodFrom").value="";document.getElementById("periodTo").value=""; };
